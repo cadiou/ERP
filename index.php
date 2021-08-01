@@ -1,8 +1,7 @@
 <?php
 /*
- * 210726
+ * 210801 CADIOU.DEV
  * RT ERP / index.php
- * Baptiste Cadiou
  *
  */
 class HTML {
@@ -1022,16 +1021,22 @@ if ($concept=="PLANNING"){
 	$table.= "</table>";
 	$html->body($table);
 }
+########################################################################################################
 ### INVENTAIRE ####################################################################################################################################################################
 if ($concept=="INVENTAIRE"){
+	# SCANNER GENERAL #
 	if (($list<>"LEARN")and(isset($_POST['scanner']))) {
-		$query = "SELECT id FROM mag_inventaire WHERE barcode = '".$_POST['scanner']."'";
-		$result_bar=  $html->query($query);
-		if (mysqli_num_rows($result_bar)!=0) {
-			$item_bar = mysqli_fetch_array($result_bar);
-			$html->redirect="?concept=INVENTAIRE&list=ITEM&item_id=".$item_bar[0];
+		if ($_POST['scanner']=="NULL") {
+			$html->redirect="?concept=INVENTAIRE&list=NULL";
 		}else{
-			$html->info="Article inconnu";
+			$query = "SELECT id FROM mag_inventaire WHERE barcode = '".$_POST['scanner']."'";
+			$result_bar=  $html->query($query);
+			if (mysqli_num_rows($result_bar)!=0) {
+				$item_bar = mysqli_fetch_array($result_bar);
+				$html->redirect="?concept=INVENTAIRE&list=ITEM&item_id=".$item_bar[0];
+			}else{
+				$html->info="Article inconnu";
+			}
 		}
 	}
 	if ($item_id>0){
@@ -1093,12 +1098,14 @@ if ($concept=="INVENTAIRE"){
 				$result_set =  $html->query($query_set);
 			}
 		}
+		# SCANNER EN CONCEPT INVENTAIRE ###########################################################
 		if (isset($_POST['scanner'])) {
 			if (($_POST['scanner']=="LEARN") and $html->uid>0 ) {
 				$html->redirect="?concept=INVENTAIRE&list=LEARN&item_id=".$id;
 			}elseif ($_POST['scanner']=="CANCEL"){
 				$html->redirect="?concept=INVENTAIRE&list=ITEM&item_id=".$id;
 			}else{
+				# LIST LEARN #######################
 				if ($list=="LEARN") {
 					if (intval($_POST['scanner'])) {
 						$query_bar = "UPDATE mag_inventaire SET mag_inventaire.barcode='".$_POST['scanner']."' WHERE mag_inventaire.id=".$id;
@@ -1442,6 +1449,109 @@ if ($concept=="INVENTAIRE"){
 			`mag_class`.`id`=`mag_inventaire`.`class_id` and
 			`mag_brand`.`id`=`mag_model`.`brand_id` and
 			`mag_area`.`id`=`mag_inventaire`.`area_id`';
+		# CLAUSE PAGE
+		if ($page <> "") {
+			$sql.= " and `mag_page`.`name`='".$page."'";
+			$sql.= " and ( `mag_page`.`class_id` =`mag_inventaire`.`class_id` or `mag_page`.`model_id` =`mag_inventaire`.`model_id` or `mag_page`.`area_id` =`mag_inventaire`.`area_id` )";
+		}
+		# CLAUSE CLASS ID
+		if ($class_id >= 0) {
+			$sql.= " and `mag_inventaire`.`class_id`='".$class_id."'";
+		}
+		# CLAUSE MODELE
+		if ($model_id > 0) {
+			$sql.= " and `mag_inventaire`.`model_id`='".$model_id."'";
+		}
+		# CLAUSE AIRE
+		if ($area_id >= 0) {
+			$sql.= " and `mag_inventaire`.`area_id`='".$area_id."'";
+		}
+		# CLAUSE CATEGORIE
+		if ($category_id >= 0) {
+			$sql.= " and `mag_model`.`category_id`='".$category_id."'";
+		}
+		# CLAUSE ORDER BY
+		if ($order_by == "mag_brand.name") {
+			$sql.= " ORDER BY mag_brand.name,mag_model.reference,mag_class.name";
+		}elseif ($order_by == "mag_class.name") {
+			$sql.= " ORDER BY mag_class.name,mag_brand.name,mag_model.reference";
+		}elseif ($order_by == "mag_model.reference") {
+				$sql.= " ORDER BY mag_model.reference,mag_class.name,mag_inventaire.tag";
+		}elseif ($order_by == "mag_model.description") {
+			$sql.= " ORDER BY mag_model.description";
+		}elseif ($order_by == "mag_inventaire.tag") {
+			$sql.= " ORDER BY mag_inventaire.tag,mag_class.name,mag_model.reference";
+		}elseif ($order_by == "mag_area.name") {
+			$sql.= " ORDER BY mag_area.name";
+		}elseif ($order_by == "mag_status.name") {
+			$sql.= " ORDER BY mag_status.name";
+		}
+		$result = $html->query($sql);
+		while ($item = mysqli_fetch_array($result)) {
+			$out .= '<tr class="tr_'.($item_id==$item[0]?"selected":"hover").'" onclick="window.location.href = \'?concept=INVENTAIRE&list=ITEM'.($class_id>0?'&class_id='.$class_id:'').'&item_id='.$item[0].'\'">'
+			.'<td>'.$item[1].'</td>'										# CLASS
+			.'<td>'.$item[3].'</td>'										# MARQUE
+			.'<td>'.$item[4].'</td>'										# REFERENCE
+			.'<td>'.$item[5].'</td>'										# DESCRIPTION
+			.'<td>'.$item[6].'</td>'										# ETIQUETTE
+			.'<td>'.$item[7].'</td>'										# N SERIE
+			.'<td>'.($item[8]==0?"":($item[8]==-1?"NC":$item[8])).'</td>'	# REF MOSCOU
+			.'<td>'.$item[12].'</td>'										# ZONE
+			.'<td class="status'.$item[14].'">'.$item[13].'</td>'			# STATUS
+			.'</tr>'."\n";
+		}
+		$out.='</table>';
+#### ITEM NULL ################################################################################################################################################################
+	}elseif ($list=="NULL"){
+		# ENTETE CONTEXTUEL
+		
+		$out.="<h1>Liste du matérie sans code-barre</h1>";
+		# LISTE DES ITEMS
+		$order_by 	= (isset($_GET['order_by'])?$_GET['order_by']:"mag_class.name");
+		$out.="<table>";
+		# Headers
+		$out.='
+			<th><a href="?concept=INVENTAIRE&'.($page<>""?"page=".$page."&":"").($class_id>0?"class_id=".$class_id."&":"").($model_id>0?"model_id=".$model_id."&":"").($area_id>=0?"area_id=".$area_id."&":"").($category_id>=0?"category_id=".$category_id."&":"").'order_by=mag_class.name">Classe</a></th>
+			<th><a href="?concept=INVENTAIRE&'.($page<>""?"page=".$page."&":"").($class_id>0?"class_id=".$class_id."&":"").($model_id>0?"model_id=".$model_id."&":"").($area_id>=0?"area_id=".$area_id."&":"").($category_id>=0?"category_id=".$category_id."&":"").'order_by=mag_brand.name">Marque</a></th>
+			<th><a href="?concept=INVENTAIRE&'.($page<>""?"page=".$page."&":"").($class_id>0?"class_id=".$class_id."&":"").($model_id>0?"model_id=".$model_id."&":"").($area_id>=0?"area_id=".$area_id."&":"").($category_id>=0?"category_id=".$category_id."&":"").'order_by=mag_model.reference">Modèle</a></th>
+			<th><a href="?concept=INVENTAIRE&'.($page<>""?"page=".$page."&":"").($class_id>0?"class_id=".$class_id."&":"").($model_id>0?"model_id=".$model_id."&":"").($area_id>=0?"area_id=".$area_id."&":"").($category_id>=0?"category_id=".$category_id."&":"").'order_by=mag_model.description">Description</a></th>
+			<th><a href="?concept=INVENTAIRE&'.($page<>""?"page=".$page."&":"").($class_id>0?"class_id=".$class_id."&":"").($model_id>0?"model_id=".$model_id."&":"").($area_id>=0?"area_id=".$area_id."&":"").($category_id>=0?"category_id=".$category_id."&":"").'order_by=mag_inventaire.tag">Etiquette</a></th>
+			<th>N° Série</th>
+			<th>Ref. Moscou</th>
+			<th><a href="?concept=INVENTAIRE&'.($page<>""?"page=".$page."&":"").($class_id>0?"class_id=".$class_id."&":"").($model_id>0?"model_id=".$model_id."&":"").($area_id>=0?"area_id=".$area_id."&":"").($category_id>=0?"category_id=".$category_id."&":"").'order_by=mag_area.name">Aire</a></th>
+			<th><a href="?concept=INVENTAIRE&'.($page<>""?"page=".$page."&":"").($class_id>0?"class_id=".$class_id."&":"").($model_id>0?"model_id=".$model_id."&":"").($area_id>=0?"area_id=".$area_id."&":"").($category_id>=0?"category_id=".$category_id."&":"").'order_by=mag_status.name">&Eacute;tat</a></th>
+			</tr><tr>';
+		# Selections
+		$sql = 'SELECT 	`mag_inventaire`.id,		# 0
+			`mag_class`.name,		# 1
+			`mag_class`.`info`,		# 2
+			`mag_brand`.`name`,		# 3
+			`mag_model`.`reference`,	# 4
+			`mag_model`.`description`,	# 5
+			`mag_inventaire`.`tag`,         # 6
+			`mag_inventaire`.`serial`,	# 7
+			`mag_inventaire`.`refMoscou`,	# 8
+			`mag_inventaire`.`info`,	# 9
+			`mag_model`.`info`,		#10
+			`mag_model`.`hyperlien`,	#11
+			`mag_area`.`name`,		#12
+			`mag_status`.`name`,		#13
+			`mag_status`.`id`,		#14
+			`mag_inventaire`.`model_id`,	#15
+			`mag_model`.`brand_id`,
+			`mag_inventaire`.`class_id`,
+			`mag_inventaire`.`barcode`
+			FROM `mag_inventaire`,`mag_status`,`mag_model`,`mag_class`,`mag_brand`,`mag_area`';
+		if ($page <> "") {
+			$sql .= ',`mag_page`';
+		}
+		# REQUETE
+		$sql.= 'WHERE `mag_status`.`id`=`mag_inventaire`.`status_id` and
+			`mag_model`.`id`=`mag_inventaire`.`model_id` and
+			`mag_class`.`id`=`mag_inventaire`.`class_id` and
+			`mag_brand`.`id`=`mag_model`.`brand_id` and
+			`mag_area`.`id`=`mag_inventaire`.`area_id` and
+			`mag_inventaire`.`barcode` IS NULL ';
 		# CLAUSE PAGE
 		if ($page <> "") {
 			$sql.= " and `mag_page`.`name`='".$page."'";
