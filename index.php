@@ -1,6 +1,6 @@
 <?php
 /*
- * 210801 CADIOU.DEV
+ * 210802 CADIOU.DEV
  * RT ERP / index.php
  *
  */
@@ -816,8 +816,8 @@ if ($concept=="RESAS"){
 					}
 					$formulaire.= "</table>";
 					$formulaire.= '<h2></h2>';
-					$formulaire.= '<table class="menubar"><tr height="50"><th><a class="menubut" href="mag_resa_print.php?id='.$id.'">Fiche de sortie</a></th>';
-					$formulaire.= '<th><a class="menubut" href="mag_resa_ata.php?id='.$id.'">Carnet ATA</a></th></tr></table>';
+					$formulaire.= '<table class="menubar"><tr height="50"><th><a class="menubut" href="?concept=RESA_OUT&list=print&id='.$id.'">Fiche de sortie</a></th>';
+					$formulaire.= '<th><a class="menubut" href="?concept=RESA_OUT&list=ATA&id='.$id.'">Carnet ATA</a></th></tr></table>';
 			}else{
 					$formulaire.= " Sélectionner une classe pour choisir du matériel.";
 			}
@@ -1887,6 +1887,205 @@ if ($concept=="CONTACTS"){
 	$out.='</table>';
 	$html->body($out);
 }
-$html->out();
+if ($concept<>"RESA_OUT") {
+	$html->out();
+}else{
+	if ($id>0) {
+		if ($list=="ATA") {
+			header("Content-Type: text/csv; charset=UTF-8");
+			header("Content-Type: text/csv");
+			header("Content-disposition: filename=resa".$id.".csv");
+			$sql = 'SELECT `mag_brand`.`name`,
+    	        `mag_model`.`reference`,
+				`mag_model`.`description`,
+				a.tag,
+				a.`serial`,
+    	        `mag_model`.`poids`,
+    	        `mag_model`.`prix`,
+				`mag_model`.`origine`
+    	        FROM `mag_inventaire` AS a,`mag_model`,`mag_brand`,mag_resa_item,mag_class ';
+		    $sql.= 'WHERE `mag_model`.`id`=a.`model_id` and
+    	        `mag_brand`.`id`=`mag_model`.`brand_id` and mag_class.id = a.class_id and ';
+			$sql.= ' a.id = mag_resa_item.item_id AND mag_resa_item.resa_id='.$id;
+			# $sql.= ' GROUP BY `mag_brand`.`name`,`mag_model`.`reference`,`mag_model`.`description`, a.`tag`, a.`serial`, a.`refMoscou`, a.`model_id`, mag_class.name';
+			# $sql.= ' GROUP BY a.`serial`';
+			$sql.= "  ORDER BY mag_brand.name,mag_model.reference";
+			$result = $html->query($sql);
+			if (mysqli_num_rows($result)!=0) {
+				$i = 1;
+				$formulaire=   utf8_decode('NOMBRE DE PIÈCES;CONTENANT;DÉSIGNATION;POIDS;UNITÉ POIDS;VALEUR HT;PAYS D\'ORIGINE').PHP_EOL;
+				while ($item = mysqli_fetch_array($result)) {
+					$formulaire .= "1;Marchandise ".$i++.";"
+						.utf8_decode($item[0])." ".utf8_decode($item[1]).' '.utf8_decode($item[2])." ".($item[3]!=""?"(".utf8_decode($item[3]).") ":"")
+						.($item[4]!=""?utf8_decode($item[4]):"N/C").';'.utf8_decode($item[5]).';kg;'
+						.utf8_decode($item[6]).';'.utf8_decode($item[7]).PHP_EOL;
+				}
+			}else{
+				$formulaire="La resa ".$id." n'existe pas";
+			}
+		}else{
+			### FORMULAIRE PRINT ###
+			?>
+			<html>
+			<head>
+			<style>
+			h1 {
+				font-size:125%;
+				color: white;
+				background-color: #43b61d;
+				text-align: center;
+				-webkit-print-color-adjust: exact;
+			}
+			h2 {
+				font-size:125%;
+				color: #43b61d;
+				text-align: center;
+				-webkit-print-color-adjust: exact;
+			}
+			th {
+  				display: table-cell;
+  				vertical-align: top;
+  				text-align: left;
+  				padding: 1px;
+  				font:12px Verdana;
+  				font-weight: bold;
+			}
+			table {
+				table-layout: auto;
+				width: 100%;
+			}
+			.td_full {
+  				border-bottom:0;
+			}
+			td {
+  				display: table-cell;
+  				vertical-align: top;
+  				text-align: left;
+  				padding: 1px;
+  				font:13px Verdana;
+  				border-bottom:0.5px solid #d6d6d6;
+			}
+			</style>
+			<title>Résa #<?php echo $id;?></title>
+			</head>
+			<body>
+			<table>
+			<tr><td class="td_full">
+			<img src="logo.png" width="70px" valign="middle" align="center">
+			</td><td class="td_full"></td></tr><tr><td class="td_full"></td><td class="td_full">
+			<h1>Fiche de sortie</h1>
+			<?php
+			# RECUPERATION DES DATA DE FORMULAIRE
+			if ($id>0) {
+				$query = "SELECT date_start,date_stop,mag_contact.name,mag_contact.fonction,mag_contact.mobile,slug,mag_resa.info".
+					" FROM mag_resa,mag_contact WHERE mag_contact.id = mag_resa.contact_id AND mag_resa.id=".$id;
+				$result =  $html->query($query);
+				if (mysqli_num_rows($result)>0) {
+					$item = mysqli_fetch_array($result);
+					# START DATE ####################################################################
+					$unixtimestart= intval( strtotime($item[0]) );
+					$date_depart = date('l jS \of F Y',$unixtimestart);
+					# START HEURE ####################################################################
+					$heure_depart = date('H:i', $unixtimestart);
+					# STOP   DATE ####################################################################
+					$unixtimestop= intval( strtotime($item[1]) );
+					$date_retour = date('l jS \of F Y',$unixtimestop);
+					# STOP HEURE #####################################################################
+					$heure_retour = date('H:i', $unixtimestop);
+					$nom = $item[2];
+					$fonction = $item[3];
+					$telephone = $item[4];
+					$slug = stripslashes($item[5]);
+					$info = stripslashes($item[6]);
+					$order   = array("\r\n", "\n", "\r");
+					$info = str_replace($order, "<br />", $info);
+				}else{
+					$slug="";
+					$info="";
+					$nom="";
+					$fonction="";
+					$telephone="";
+					$heure_retour = "";
+					$date_retour = "";
+					$heure_depart = "";
+					$date_depart = "";
+				}
+				# PANIER #########################################################
+				$sql = 'SELECT  a.id,
+								`mag_brand`.`name`,
+								`mag_model`.`reference`,
+								`mag_model`.`description`,
+								a.`tag`,
+								a.`serial`,
+								a.`refMoscou`,
+								a.`model_id`,
+					mag_class.name
+					FROM `mag_inventaire` AS a,`mag_model`,`mag_brand`,mag_resa_item,mag_class ';
 
+				$sql.= 'WHERE `mag_model`.`id`=a.`model_id` and
+						`mag_brand`.`id`=`mag_model`.`brand_id` and mag_class.id = a.class_id and ';
+				$sql.=  ' a.id = mag_resa_item.item_id AND mag_resa_item.resa_id='.$id;
+				$sql.= " ORDER BY mag_brand.name,mag_model.reference";
+				$result = $html->query($sql);
+				if (mysqli_num_rows($result)!=0) {
+					$formulaire=   '<h2>Liste du materiel emprunté</h2><table>';
+					# Headers
+					$formulaire.='<tr>
+							<th>Marque</th>
+							<th>Modèle</th>
+							<th>Description</th>
+							<th>Etiquette</th>
+							<!--th>N° Série</th-->
+							<!--th>Ref. Moscou</th-->
+							<!--th>Classe</th-->
+							<th>Sortie</th>
+							<th>Retour</th>
+								</tr>';
+					while ($item = mysqli_fetch_array($result)) {
+						$formulaire .= '<tr>'
+						.'<td>'.$item[1].'</td>'
+						.'<td>'.$item[2].'</td>'
+						.'<td>'.$item[3].'</td>'
+						.'<td>'.$item[4].'</td>'
+						.'<!--td>'.$item[5].'</td-->'
+						.'<!--td>'.($item[6]==0?"":($item[6]==-1?"":$item[6])).'</td-->'
+						.'<!--td class="tableau">'.$item[8].'</td-->'
+						.'<!--td class="tableau"></td-->'
+						.'<td class="tableau"></td>'
+						.'</tr>'."\n";
+					}
+					$formulaire.= "</table>";
+				}
+			}
+			?>
+			<table>
+			<?php if ($slug!="" or 1) { ?>
+				<tr class="tableau"><td class="tableau">Tournage</td><td  class="tableau" colspan=2><?php echo $slug; ?></td></tr>
+			<?php } ?>
+			<tr class="tableau"><td  class="tableau">Nom</td><td  class="tableau" colspan=2><?php echo $nom; ?></td></tr>
+			<tr class="tableau"><td class="tableau">Fonction</td><td  class="tableau" colspan=2><?php echo $fonction; ?></td></tr>
+			<tr class="tableau"><td class="tableau">Téléphone</td><td  class="tableau" colspan=2><?php echo $telephone; ?></td></tr>
+			<tr class="tableau"><td class="tableau">Départ</td><td class="tableau"><?php echo $date_depart; ?></td><td><?php echo $heure_depart; ?></td></tr>
+			<tr class="tableau"><td class="tableau">Retour</td><td class="tableau"><?php echo $date_retour; ?></td><td><?php echo $heure_retour; ?></td></tr>
+			<?php if ($info!="" or 1) { ?>
+			<tr class="tableau"><td class="tableau">Informations</td><td  class="tableau" colspan=2><?php echo $info; ?></td></tr>
+			<?php } ?>
+			</table>
+			<?php echo $formulaire; ?>
+			<h2>Signature obligatoire</h2>
+			<table width="100%" class="tableau">
+			<tr><th></th><th>Magasin</th><th>OPV/JRI</th></tr>
+			<tr height=80><td class="tableau">Sortie</td><td class="tableau">Nom :<p>Signature :</td><td class="tableau">Nom :<p>Signature :</td></tr>
+			<tr height=80><td class="tableau">Retour</td><td class="tableau">Nom :<p>Signature :</td><td class="tableau">Nom :<p>Signature :</td></tr>
+			</table>
+			</td></tr>
+			</table>
+			</body>
+			<?php
+		}
+	}else{
+		$formulaire="Il manque l'ID de la resa";
+	}
+	echo $formulaire;
+}
 ?>
