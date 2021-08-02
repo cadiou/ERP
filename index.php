@@ -409,6 +409,9 @@ if ($scanner=="USER0") {
 	$concept="PLANNING";
 }elseif (substr($scanner,0,4)=="USER") {
 	$concept="RESAS";
+}elseif (substr($scanner,0,4)=="RESA") {
+	$id = substr($_POST["scanner"],4);	
+	$html->redirect="?concept=RESAS&id=".$id;
 }elseif ($scanner=="8001841606958") {
 	$concept="FULLSCREEN";
 }
@@ -478,19 +481,22 @@ if ($concept=="RESAS"){
 			$result =  $html->query($query);
         }
 	}
-	$out="<h1>R&eacute;servations</h1>";
-	#### LISTE DES RESERVATIONS ##################################################################
-	$out.="<table>";
-	# Headers
-	$out.='	<th colspan="2"><a href="?concept=RESAS&'.($page<>""?"page=".$page."&":"").'order_by=mag_resa.date_start">D&eacute;part</a></th>
+	
+	if ($list<>"ADD" and $list<>"REMOVE") {
+	
+		$out="<h1>R&eacute;servations</h1>";
+		#### LISTE DES RESERVATIONS ##################################################################
+		$out.="<table>";
+		# Headers
+		$out.='	<th colspan="2"><a href="?concept=RESAS&'.($page<>""?"page=".$page."&":"").'order_by=mag_resa.date_start">D&eacute;part</a></th>
 			<th colspan="2"><a href="?concept=RESAS&'.($page<>""?"page=".$page."&":"").'order_by=mag_resa.date_stop">Arrivée</a></th>
 			<th>Classe</th>
 			<th>Titulaire</th>
 			<th><a href="?concept=RESAS&'.($page<>""?"page=".$page."&":"").'order_by=mag_resa.slug">Tournage</a></th>
 			<th><a href="?concept=RESAS&'.($page<>""?"page=".$page."&":"").'order_by=mag_resa.level">&Eacute;tape</a></th>
 			</tr><tr>';
-	# Selections
-	$sql = 'SELECT 	`mag_resa`.`id`,
+		# Selections
+		$sql = 'SELECT 	`mag_resa`.`id`,
 			`mag_resa`.`slug`,
 			`mag_resa`.`date_start`,
 			`mag_resa`.`date_stop`,
@@ -501,20 +507,20 @@ if ($concept=="RESAS"){
 			`mag_resa`.`stop_rack_id`,
 			`mag_resa`.`contact_id`
 			FROM mag_resa,mag_phase ';
-	$sql.= ' WHERE mag_resa.level = mag_phase.id and mag_resa.level<>6 ';
-	# CLAUSE ORDER BY
-	if ($order_by == "mag_resa.date_start" or $order_by == "") {
-		$sql.= " ORDER BY mag_resa.date_start ASC,mag_resa.date_stop ASC";
-	}elseif ($order_by == "mag_resa.date_stop") {
-	    $sql.= " ORDER BY mag_resa.date_stop";
-	}elseif ($order_by == "mag_resa.slug") {
-	    $sql.= " ORDER BY mag_resa.slug";
-	}elseif ($order_by == "mag_resa.level") {
-	    $sql.= " ORDER BY mag_resa.level DESC";
-	}
-	$result =  $html->query($sql);
-	while ($item = mysqli_fetch_array($result)) {
-	    $out .= '<tr class="tr_'.($id==$item[0]?"selected":"hover").'" onclick="window.location.href = \'?concept=RESAS&id='.$item[0].'\'">'
+		$sql.= ' WHERE mag_resa.level = mag_phase.id and mag_resa.level<>6 ';
+		# CLAUSE ORDER BY
+		if ($order_by == "mag_resa.date_start" or $order_by == "") {
+			$sql.= " ORDER BY mag_resa.date_start ASC,mag_resa.date_stop ASC";
+		}elseif ($order_by == "mag_resa.date_stop") {
+			$sql.= " ORDER BY mag_resa.date_stop";
+		}elseif ($order_by == "mag_resa.slug") {
+			$sql.= " ORDER BY mag_resa.slug";
+		}elseif ($order_by == "mag_resa.level") {
+			$sql.= " ORDER BY mag_resa.level DESC";
+		}
+		$result =  $html->query($sql);
+		while ($item = mysqli_fetch_array($result)) {
+			$out .= '<tr class="tr_'.($id==$item[0]?"selected":"hover").'" onclick="window.location.href = \'?concept=RESAS&id='.$item[0].'\'">'
 			.'<td>'.$item[2].'</td>'
 			.'<td>'.$html->rack_name($item[7]).'</td>'
 			.'<td>'.$item[3].'</td>'
@@ -523,27 +529,30 @@ if ($concept=="RESAS"){
 			.'<td>'.$html->contact_name($item[9]).'</td>'
 			.'<td>'.$item[1].'</td>'
 			.'<td  class="level';
-	    if ($item[5]==0) {
-			$out.= "0";
-	    }elseif ($item[5]==1) {
-			$out.= "0";
-	    }elseif ($item[5]==2) {
-	        $out.= "1";
-	    }elseif ($item[5]==3) {
-	        $out.= "3";
-	    }elseif ($item[5]==4) {
-	        $out.= "4";
-	    }elseif ($item[5]==5) {
-	        $out.= "2";
-	    }elseif ($item[5]==6) {
-	        $out.= "5";
-	    }
-	    $out.= "\">";
-		$out.=$item[6].'</td>'
-	        .'</tr>'."\n";
+			if ($item[5]==0) {
+				$out.= "0";
+			}elseif ($item[5]==1) {
+				$out.= "0";
+			}elseif ($item[5]==2) {
+				$out.= "1";
+			}elseif ($item[5]==3) {
+				$out.= "3";
+			}elseif ($item[5]==4) {
+				$out.= "4";
+			}elseif ($item[5]==5) {
+				$out.= "2";
+			}elseif ($item[5]==6) {
+				$out.= "5";
+			}
+			$out.= "\">";
+			$out.=$item[6].'</td>'
+				.'</tr>'."\n";
+		}
+		$out.='</table>';
+		$html->body($out);
+	
 	}
-	$out.='</table>';
-	$html->body($out);
+	
 	if ($id>0) {
 		#####################################################################
 		# LA RESA EXISTE ET NOUS ALLONS LA MODIFIER
@@ -679,6 +688,8 @@ if ($concept=="RESAS"){
 			if (isset($_POST['scanner'])) {
 				if (($_POST['scanner']=="ADD") and $html->uid>0 ) {
 					$html->redirect="?concept=RESAS&list=ADD&id=".$id;
+				}elseif (($_POST['scanner']=="REMOVE") and $html->uid>0 ) {
+					$html->redirect="?concept=RESAS&list=REMOVE&id=".$id;
 				}elseif ($_POST['scanner']=="CANCEL"){
 					$html->redirect="?concept=RESAS&id=".$id;
 				}else{
@@ -711,6 +722,26 @@ if ($concept=="RESAS"){
 								."body='". addslashes("Effacement du code-barre")."'" ;
 							$result_log =  $html->query($query_log);
 							$html->redirect="?concept=INVENTAIRE&list=ITEM&item_id=".$id;
+						}
+					}elseif ($list=="ADD") {
+						$query_bar = "SELECT id FROM mag_inventaire WHERE barcode ='".$_POST['scanner']."'";
+						$result_bar =  $html->query($query_bar);
+						if (mysqli_num_rows($result_bar)!=0) {
+							$item_bar = mysqli_fetch_array($result_bar);
+							$query = 'REPLACE INTO mag_resa_item(resa_id,item_id) VALUES '."(".$id.",".$item_bar[0].")";
+							$result =  $html->query($query);
+						}else{
+							$html->info = "Objet absent de la base";
+						}
+					}elseif ($list=="REMOVE") {
+						$query_bar = "SELECT id FROM mag_inventaire WHERE barcode ='".$_POST['scanner']."'";
+						$result_bar =  $html->query($query_bar);
+						if (mysqli_num_rows($result_bar)!=0) {
+							$item_bar = mysqli_fetch_array($result_bar);
+							$query = 'DELETE FROM mag_resa_item WHERE resa_id = '.$id.' AND item_id = '.$item_bar[0];
+							$result =  $html->query($query);
+						}else{
+							$html->info = "Objet absent de la base";
 						}
 					}
 				}
@@ -1501,11 +1532,11 @@ if ($concept=="INVENTAIRE"){
 			.'</tr>'."\n";
 		}
 		$out.='</table>';
-#### ITEM NULL ################################################################################################################################################################
+		#### ITEM NULL ################################################################################################################################################################
 	}elseif ($list=="NULL"){
 		# ENTETE CONTEXTUEL
 		
-		$out.="<h1>Liste du matérie sans code-barre</h1>";
+		$out="<h1>Liste du matérie sans code-barre</h1>";
 		# LISTE DES ITEMS
 		$order_by 	= (isset($_GET['order_by'])?$_GET['order_by']:"mag_class.name");
 		$out.="<table>";
@@ -1972,7 +2003,9 @@ if ($concept<>"RESA_OUT") {
 			<table>
 			<tr><td class="td_full">
 			<img src="logo.png" width="70px" valign="middle" align="center">
-			</td><td class="td_full"></td></tr><tr><td class="td_full"></td><td class="td_full">
+			</td><td class="td_full">
+			<img src="/barcodegen/html/image.php?code=code128&amp;o=1&amp;t=30&amp;r=2&amp;text=RESA<?php echo $id; ?>&amp;f=0&amp;a1=B&amp;a2=" alt="RESA<?php echo $id; ?>">
+			</td></tr><tr><td class="td_full"></td><td class="td_full">
 			<h1>Fiche de sortie</h1>
 			<?php
 			# RECUPERATION DES DATA DE FORMULAIRE
