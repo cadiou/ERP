@@ -2119,6 +2119,5 @@ if ($concept<>"RESA_OUT") {
 	}else{
 		$formulaire="Il manque l'ID de la resa";
 	}
-	echo $formulaire;
 }
 ?>
