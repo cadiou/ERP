@@ -1,6 +1,6 @@
 <?php
 /*
- * 210802 CADIOU.DEV
+ * 210813 CADIOU.DEV
  * RT ERP / index.php
  *
  */
@@ -1954,6 +1954,7 @@ if ($concept<>"RESA_OUT") {
 			}else{
 				$formulaire="La resa ".$id." n'existe pas";
 			}
+			echo $formulaire;
 		}else{
 			### FORMULAIRE PRINT ###
 			?>
