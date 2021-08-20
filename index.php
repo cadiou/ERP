@@ -1,6 +1,6 @@
 <?php
 /*
- * 210813 CADIOU.DEV
+ * 210820 CADIOU.DEV
  * RT ERP / index.php
  *
  */
@@ -46,115 +46,11 @@ class HTML {
 		}else{
 			$this->terminal = "LAZARUS";
 		}
-		# HEAD LEFT BODY FOOT INIT
-		$this->head = "<html>";
-		$this->head.= "<head>";
-   		if (null !== CONFIG::HTML_HEADER) {
-   			$this->head.= CONFIG::HTML_HEADER;
- 		}
-		$this->head.= "<title>".(isset($_GET['concept'])?$_GET['concept']:'ERP').' '.$this->station(CONFIG::ID_STATION)."</title>";
-		if ($timeout>0) {
-			$this->head.= "<meta HTTP-EQUIV=\"Refresh\" CONTENT=\"".$timeout."\">";
-		}
-		$this->head.=
-		  '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />'.
-		  '<link href="style.css" rel="stylesheet" media="all" type="text/css" />'.
-		  '<meta Http-Equiv="Cache-Control" Content="no-cache">'.
-		  '<meta Http-Equiv="Pragma" Content="no-cache">'.
-		  '<meta Http-Equiv="Expires" Content="0">'.
-		  '<meta Http-Equiv="Pragma-directive: no-cache">'.
-		  '<meta Http-Equiv="Cache-directive: no-cache">'.
-		  "</head>";
-      	$this->head.=
-        	"\n".'<!--  ERP RT FRANCE  -->'.
-        	"\n".'<!--  Baptiste Cadiou  -->'.
-        	"\n".'<!--  https://github.com/cadiou/  -->'."\n";
-		$this->head.= "<body>";
 		$this->foot = "<hr />";
 		$this->foot .= $this->group(CONFIG::ID_GROUP)." / ".CONFIG::DB_NAME." / ".gethostname();
 		$this->foot.= "</body>";
 		$this->foot.= "</html>";
 		$this->body = "";
-	}
-	public function menubar($concept) {
-	#	$concept = (isset($_GET['concept'])?$_GET['concept']:'PLANNING');
-		$list = (isset($_GET['list'])?$_GET['list']:'ITEM');
-		$this->head.='<table class="menubar"><tr><td>';
-		if ($this->uid>0) {
-			if ($concept<>"RESAS") {
-				$this->head.='<a href="?concept=RESAS" class="menubut">R&Eacute;SERVER</a> ';
-			}else{
-				$this->head.='<a href="?concept=RESAS" class="menuact">R&Eacute;SERVER</a> ';
-			}
-		}
-		if ($concept<>"PLANNING") {
-			$this->head.='<a href="?concept=PLANNING" class="menubut">PLANNING</a> ';
-		}else{
-			$this->head.='<a href="?concept=PLANNING" class="menuact">PLANNING</a> ';
-		}
-		
-		if ($concept<>"INVENTAIRE") {
-			$this->head.='<a href="?concept=INVENTAIRE" class="menubut">INVENTAIRE</a> ';
-		}else{
-			$this->head.='<a href="?concept=INVENTAIRE" class="menuact">INVENTAIRE</a> ';
-			if ($list<>"CLASS") {
-				$this->head.='<a href="?concept=INVENTAIRE&list=CLASS" class="menubut">CLASSES</a> ';
-			}else{
-				$this->head.='<a href="?concept=INVENTAIRE&list=CLASS" class="menuact">CLASSES</a> ';
-			}
-			if ($list<>"BRAND") {
-				$this->head.='<a href="?concept=INVENTAIRE&list=BRAND" class="menubut">MARQUES</a> ';
-			}else{
-				$this->head.='<a href="?concept=INVENTAIRE&list=BRAND" class="menuact">MARQUES</a> ';
-			}
-			if ($list<>"MODEL") {
-				$this->head.='<a href="?concept=INVENTAIRE&list=MODEL" class="menubut">MOD&Egrave;LES</a> ';
-			}else{
-				$this->head.='<a href="?concept=INVENTAIRE&list=MODEL" class="menuact">MOD&Egrave;LES</a> ';
-			}
-			if ($list<>"AREA") {
-				$this->head.='<a href="?concept=INVENTAIRE&list=AREA" class="menubut">AIRES</a> ';
-			}else{
-				$this->head.='<a href="?concept=INVENTAIRE&list=AREA" class="menuact">AIRES</a> ';
-			}
-			if ($list<>"SIM") {
-				$this->head.='<a href="?concept=INVENTAIRE&list=SIM" class="menubut">SIM</a> ';
-			}else{
-				$this->head.='<a href="?concept=INVENTAIRE&list=SIM" class="menuact">SIM</a> ';
-			}
-		}
-		if ($concept<>"HISTORIQUE") {
-			$this->head.='<a href="?concept=HISTORIQUE" class="menubut">HISTORIQUE</a> ';
-		}else{
-			$this->head.='<a href="?concept=HISTORIQUE" class="menuact">HISTORIQUE</a> ';
-		}
-		if ($concept<>"CONTACTS") {
-			$this->head.='<a href="?concept=CONTACTS" class="menubut">CONTACTS</a> ';
-		}else{
-			$this->head.='<a href="?concept=CONTACTS" class="menuact">CONTACTS</a> ';
-		}
-		$this->head.='</td><td class="menusel">';
-		# LOGIN ET BARCODE
-		$this->head .= "<FORM method=\"POST\">";
-		# BARCODE
-		$this->head .= '<input type="text" id="scanner" name="scanner" size="2" placeholder="SCAN" autofocus class="scanner">';
-		# UTILISATEUR
-		$sql = "select `id`,`name` from user where name is not null and active = true and station_ID = ".CONFIG::ID_STATION." order by `name` asc";
-		$result = $this->query($sql);
-		$out  = '<SELECT NAME="user_id" onchange="this.form.submit()">';
-		$out .= '<OPTION VALUE="-1">Identifiez-vous !</A>';
-		while ($item = mysqli_fetch_array($result)) {
-			$out .= '<OPTION VALUE="'.$item['id'].'"';
-			if (($this->uid == $item['id'])and($this->uid != "")) {
-			$out .= " SELECTED";
-			}
-			$out .= '>'.$item['name'].'</OPTION>'."\n";
-		}
-		$out .= '</SELECT>';
-		$this->head .= $out;
-		$this->head .= "</FORM>";
-		$this->head.='</td>';
-		$this->head.='</tr></table>';
 	}
 	# Ajoute du texte au corps de page.
 	public function body($text) {
@@ -379,8 +275,13 @@ class HTML {
        	return $out;
 	}
 }
+
+### CONSTRUCTION DE LA PAGE
+
 $html = new html("Enterprise Resource Planning",360);
-### VARIABLES GET / POST #################################################################
+
+### VARIABLES GET / POST
+
 $concept = (isset($_GET['concept'])?$_GET['concept']:'PLANNING');
 $list = (isset($_GET['list'])?$_GET['list']:'ITEM');
 $page 		= (isset($_GET['page'])?$_GET['page']:"");
@@ -403,8 +304,10 @@ if (isset($_POST['only_time_stop'])) {
 $classe 	= (isset($_POST['mag_class_id'])?$_POST['mag_class_id']:-1);
 $slug 		= (isset($_POST['slug'])?$_POST['slug']:"");
 $info 		= (isset($_POST['info'])?stripslashes($_POST['info']):"");
-
 $scanner 		= (isset($_POST['scanner'])?$_POST['scanner']:"NO");
+
+### SCANNER ACTIONS
+
 if ($scanner=="USER0") {
 	$concept="PLANNING";
 }elseif (substr($scanner,0,4)=="USER") {
@@ -415,8 +318,115 @@ if ($scanner=="USER0") {
 }elseif ($scanner=="8001841606958") {
 	$concept="FULLSCREEN";
 }
-$html->menubar($concept);
-### RESERVER ######################################################################################################################################################################
+
+### HEADER HTML ET MENUBAR
+
+$html->head = "<html>";
+$html->head.= "<head>";
+   if (null !== CONFIG::HTML_HEADER) {
+	   $html->head.= CONFIG::HTML_HEADER;
+ }
+$html->head.= "<title>".(isset($_GET['concept'])?$_GET['concept']:'ERP').' '.$html->station(CONFIG::ID_STATION)."</title>";
+if ($timeout>0) {
+	$html->head.= "<meta HTTP-EQUIV=\"Refresh\" CONTENT=\"".$timeout."\">";
+}
+$html->head.=
+  '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />'.
+  '<link href="style.css" rel="stylesheet" media="all" type="text/css" />'.
+  '<meta Http-Equiv="Cache-Control" Content="no-cache">'.
+  '<meta Http-Equiv="Pragma" Content="no-cache">'.
+  '<meta Http-Equiv="Expires" Content="0">'.
+  '<meta Http-Equiv="Pragma-directive: no-cache">'.
+  '<meta Http-Equiv="Cache-directive: no-cache">'.
+  "</head>";
+$html->head.=
+	"\n".'<!--  ERP RT FRANCE  -->'.
+	"\n".'<!--  Baptiste Cadiou  -->'.
+	"\n".'<!--  https://github.com/cadiou/  -->'."\n";
+$html->head.= "<body>";
+
+
+$html->head.='<table class="menubar"><tr><td>';
+if ($html->uid>0) {
+	if ($concept<>"RESAS") {
+		$html->head.='<a href="?concept=RESAS" class="menubut">R&Eacute;SERVER</a> ';
+	}else{
+		$html->head.='<a href="?concept=RESAS" class="menuact">R&Eacute;SERVER</a> ';
+	}
+}
+if ($concept<>"PLANNING") {
+	$html->head.='<a href="?concept=PLANNING" class="menubut">PLANNING</a> ';
+}else{
+	$html->head.='<a href="?concept=PLANNING" class="menuact">PLANNING</a> ';
+}
+
+if ($concept<>"INVENTAIRE") {
+	$html->head.='<a href="?concept=INVENTAIRE" class="menubut">INVENTAIRE</a> ';
+}else{
+	$html->head.='<a href="?concept=INVENTAIRE" class="menuact">INVENTAIRE</a> ';
+	if ($list<>"CLASS") {
+		$html->head.='<a href="?concept=INVENTAIRE&list=CLASS" class="menubut">CLASSES</a> ';
+	}else{
+		$html->head.='<a href="?concept=INVENTAIRE&list=CLASS" class="menuact">CLASSES</a> ';
+	}
+	if ($list<>"BRAND") {
+		$html->head.='<a href="?concept=INVENTAIRE&list=BRAND" class="menubut">MARQUES</a> ';
+	}else{
+		$html->head.='<a href="?concept=INVENTAIRE&list=BRAND" class="menuact">MARQUES</a> ';
+	}
+	if ($list<>"MODEL") {
+		$html->head.='<a href="?concept=INVENTAIRE&list=MODEL" class="menubut">MOD&Egrave;LES</a> ';
+	}else{
+		$html->head.='<a href="?concept=INVENTAIRE&list=MODEL" class="menuact">MOD&Egrave;LES</a> ';
+	}
+	if ($list<>"AREA") {
+		$html->head.='<a href="?concept=INVENTAIRE&list=AREA" class="menubut">AIRES</a> ';
+	}else{
+		$html->head.='<a href="?concept=INVENTAIRE&list=AREA" class="menuact">AIRES</a> ';
+	}
+	if ($list<>"SIM") {
+		$html->head.='<a href="?concept=INVENTAIRE&list=SIM" class="menubut">SIM</a> ';
+	}else{
+		$html->head.='<a href="?concept=INVENTAIRE&list=SIM" class="menuact">SIM</a> ';
+	}
+}
+if ($concept<>"HISTORIQUE") {
+	$html->head.='<a href="?concept=HISTORIQUE" class="menubut">HISTORIQUE</a> ';
+}else{
+	$html->head.='<a href="?concept=HISTORIQUE" class="menuact">HISTORIQUE</a> ';
+}
+if ($concept<>"CONTACTS") {
+	$html->head.='<a href="?concept=CONTACTS" class="menubut">CONTACTS</a> ';
+}else{
+	$html->head.='<a href="?concept=CONTACTS" class="menuact">CONTACTS</a> ';
+}
+$html->head.='</td><td class="menusel">';
+# LOGIN ET BARCODE
+$html->head .= "<FORM method=\"POST\">";
+# BARCODE
+$html->head .= '<input type="text" id="scanner" name="scanner" size="2" placeholder="SCAN" autofocus class="scanner">';
+# UTILISATEUR
+$sql = "select `id`,`name` from user where name is not null and active = true and station_ID = ".CONFIG::ID_STATION." order by `name` asc";
+$result = $html->query($sql);
+$out  = '<SELECT NAME="user_id" onchange="this.form.submit()">';
+$out .= '<OPTION VALUE="-1">Identifiez-vous !</A>';
+while ($item = mysqli_fetch_array($result)) {
+	$out .= '<OPTION VALUE="'.$item['id'].'"';
+	if (($html->uid == $item['id'])and($html->uid != "")) {
+	$out .= " SELECTED";
+	}
+	$out .= '>'.$item['name'].'</OPTION>'."\n";
+}
+$out .= '</SELECT>';
+$html->head .= $out;
+$html->head .= "</FORM>";
+$html->head.='</td>';
+$html->head.='</tr></table>';
+
+
+
+### RESERVER
+
 if ($concept=="RESAS"){
 	$order_by 	= (isset($_GET['order_by'])?$_GET['order_by']:"mag_resa.date_start");
 	if (isset($_POST['new'])) {
@@ -552,7 +562,6 @@ if ($concept=="RESAS"){
 		$html->body($out);
 	
 	}
-	
 	if ($id>0) {
 		#####################################################################
 		# LA RESA EXISTE ET NOUS ALLONS LA MODIFIER
@@ -916,49 +925,63 @@ if ($concept=="RESAS"){
 
 	}
 }
-### PLANNING ##############################################################################################################################
+
+### PLANNING
+
 $week = substr("0".(isset($_GET['week'])?$_GET['week']:date('W')),-2);
 $year = (isset($_GET['year'])?$_GET['year']:date('Y'));
-$n = ((isset($_GET['n'])?$_GET['n']:12)-1);
+$n = ((isset($_GET['n'])?$_GET['n']:2)-1);
 $date1 = date( "Y-m-d 00:00:00", strtotime($year."W".$week."1") ); // First day of week
 $date2 = date( "Y-m-d 23:59:59", strtotime($year."W".$week."7+".$n."week") ); // Last day of week
 if ($concept=="PLANNING"){
-
 	$table = "<table>";
-	$table.= '<tr><td colspan=2 class=arrow><a href="?n='.($n+1).'&year='.date("Y",strtotime($year."W".$week."7-".($n+1)."week")).'&week='.
+
+	# NAVIGATION
+	$table.= '<tr>';
+	$table.= '<td colspan=2 class=arrow       ><a href="?n='.($n+1).($page<>""?'&page='.$page:"").'&year='.
+		date("Y",strtotime($year."W".$week."7-".($n+1)."week")).'&week='.
 		date("W",strtotime($year."W".$week."7-".($n+1)."week")).
-		'">&larr;</a></td><td colspan=4 class="td_center">'.
-		date("Y",strtotime($year."W".$week)).'</td><td colspan=2 class=arrow_droite><a href="?n='.($n+1).'&year='.
+		'">&larr;</a></td>';
+	$table.= '<td colspan=4 class="td_center" ><a href="?n='.($n+1).($page==""?'&page=compact':"").'&year='.
+		$year.'&week='.
+		$week.
+		'">'.date("Y",strtotime($year."W".$week)).'</a></td>';
+	$table.= '<td colspan=2 class=arrow_droite><a href="?n='.($n+1).($page<>""?'&page='.$page:"").'&year='.
 		date("Y",strtotime($year."W".$week."7+".($n+1)."week")).'&week='.
 	    date("W",strtotime($year."W".$week."7+".($n+1)."week")).
-	    '">&rarr;</a></td></tr>';
-	$table.='<tr><td width="12.5%"></td>';
+	    '">&rarr;</a></td>';
+	$table.= '</tr>';
 	
 	# JOURS DE LA SEMAINE
-	
+	$table.='<tr><td width="12.5%"></td>';	
 	for ($i = 0; $i <7 ; $i++) {
 		$table.= '<td width="12.5%"';
-		#if ((date("w")==($i+1)) or (date("w")==0 and $i==6)) {
-		#	$table .= ' class="tr_selected"';
-		#}
 		$table.= ">".strftime("%A", ($i+4)*24*3600);
 		$table.= "</td>";
 	}
 	$table.="</tr>";
+	
 	for ($i = 0; $i <= $n; $i++) {
-		# CLASSES DE LA SEMAINE
-		$unixdate=strtotime($year."W".$week."+".$i."week");
-		$query = "SELECT mag_inventaire.class_id, mag_class.name".
-			" FROM mag_resa, mag_resa_item, mag_inventaire, mag_class WHERE not(unix_timestamp(date_start)-(86400*7) > ".$unixdate.
-            " AND unix_timestamp(date_stop)-(86400*7) > ".$unixdate.")".
-            " AND not(unix_timestamp(date_start) < ".$unixdate.
-            " AND unix_timestamp(date_stop) < ".$unixdate.")".
-			" AND mag_resa.id = mag_resa_item.resa_id".
-			" AND mag_inventaire.id = mag_resa_item.item_id".
-			" AND mag_class.id = mag_inventaire.class_id".
-			" AND mag_class.planning = 1".
-			" GROUP by mag_inventaire.class_id".
-			" ORDER by mag_class.name";
+		if ($page=="compact" or $page=="print") {
+			# CLASSES DE LA SEMAINE
+			$unixdate=strtotime($year."W".$week."+".$i."week");
+			$query = "SELECT mag_inventaire.class_id, mag_class.name".
+				" FROM mag_resa, mag_resa_item, mag_inventaire, mag_class WHERE not(unix_timestamp(date_start)-(86400*7) > ".$unixdate.
+				" AND unix_timestamp(date_stop)-(86400*7) > ".$unixdate.")".
+				" AND not(unix_timestamp(date_start) < ".$unixdate.
+				" AND unix_timestamp(date_stop) < ".$unixdate.")".
+				" AND mag_resa.id = mag_resa_item.resa_id".
+				" AND mag_inventaire.id = mag_resa_item.item_id".
+				" AND mag_class.id = mag_inventaire.class_id".
+				" AND mag_class.planning >=1 ".
+				" GROUP by mag_inventaire.class_id".
+				" ORDER by mag_class.planning,mag_class.name";
+		}else{
+			# TOUTES LES CLASSES PLANNING
+			$query = "SELECT id, mag_class.name FROM mag_class WHERE mag_class.planning >= 1".
+				" GROUP by id".
+				" ORDER by mag_class.planning,mag_class.name";
+		}
 		$result_class =  $html->query($query);
 		# BARRE DE DATES DE LA SEMAINE
 		$table.='<tr class="tr_date">';
@@ -1052,8 +1075,9 @@ if ($concept=="PLANNING"){
 	$table.= "</table>";
 	$html->body($table);
 }
-########################################################################################################
-### INVENTAIRE ####################################################################################################################################################################
+
+### INVENTAIRE 
+
 if ($concept=="INVENTAIRE"){
 	# SCANNER GENERAL #
 	if (($list<>"LEARN")and(isset($_POST['scanner']))) {
@@ -1880,13 +1904,15 @@ if ($concept=="INVENTAIRE"){
 	$html->body = '<table height=100% width=100%><tr><td class="td_center"><img src="mrpropre.png"><h1>Le scanner reconnait bien les lingettes mais elles ne font pas partie de l\'inventaire !</h1>';
 	$html->body.= "</td></tr></table>";
 }
-##########################################################################################################################
+
 # HISTORIQUE
+
 if ($concept=="HISTORIQUE"){
 	$html->mag_historique("AND `mag_item_log`.active = 1 ORDER BY datetime DESC LIMIT 1000",true);
 }
-#########################################################################################################################
+
 # CONTACTS
+
 if ($concept=="CONTACTS"){
 	$out="<table>";
 	# Headers
@@ -1918,6 +1944,9 @@ if ($concept=="CONTACTS"){
 	$out.='</table>';
 	$html->body($out);
 }
+
+### OUT
+
 if ($concept<>"RESA_OUT") {
 	$html->out();
 }else{
