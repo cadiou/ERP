@@ -4,6 +4,7 @@
  * RT ERP / index.php
  *
  */
+
 class HTML {
 	public function __construct($page_titre,$timeout) {
 		# CONFIG
@@ -597,7 +598,7 @@ if ($concept=="RESAS"){
 						) ? " SELECTED":""
 					)
 					.'>'.
-					date('l jS \of F Y',$unixtime).'</OPTION>';
+					strftime("%A %e %b %Y", $unixtime).'</OPTION>';
 			}
 			$formulaire .= '</SELECT>';
 			$formulaire .= '</td>';
@@ -635,7 +636,7 @@ if ($concept=="RESAS"){
 							) ? " SELECTED":""
 						)
 						.'>'.
-						date('l jS \of F Y',$unixtime).'</OPTION>';
+						strftime("%A %e %b %Y", $unixtime).'</OPTION>';
 				}
 			}
 			$formulaire .= '</SELECT>';
@@ -896,9 +897,7 @@ if ($concept=="RESAS"){
 				$formulaire.= '<OPTION VALUE="'.
 					mktime(0, 0, 0, date("m"), date("d")+$i, date("Y")).
 						'" '.($i==0?" SELECTED":"").'>'.
-						date('l jS \of F Y',
-						mktime(0, 0, 0, date("m"), date("d")+$i, date("Y"))
-						).'</OPTION>';
+						strftime("%A %e %b %Y", mktime(0, 0, 0, date("m"), date("d")+$i, date("Y"))).'</OPTION>';
 				}
 
             $formulaire .= '</SELECT>';
@@ -992,9 +991,9 @@ if ($concept=="PLANNING"){
 			if (date("d M")==date( "d M", $unixdate) ) {
 				$table .= ' class="tr_selected"';
 			}
-			$table.=">";
-			$table.="<!--h2-->".date( "d M", $unixdate)."<!--/h2-->";
-			$table.="</th>";
+			$table.= ">";
+			$table.= strftime("%e %b", $unixdate);
+			$table.= "</th>";
 		}
 		$table.="</tr>";
 		# UNE LIGNE PAR CLASSE
