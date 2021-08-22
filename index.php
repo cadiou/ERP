@@ -1,6 +1,6 @@
 <?php
 /*
- * 210820 CADIOU.DEV
+ * 210822 CADIOU.DEV
  * RT ERP / index.php
  *
  */
@@ -53,12 +53,10 @@ class HTML {
 		$this->foot.= "</html>";
 		$this->body = "";
 	}
-	# Ajoute du texte au corps de page.
 	public function body($text) {
 		$this->body .= "<p>".$text."</p>";
 	}
-	public function user($uid)
-	{
+	public function user($uid) {
 		$query = "SELECT name ".
 				" FROM `user`".
 				" WHERE id = '".$uid."' and station_id = ".CONFIG::ID_STATION;
@@ -68,8 +66,7 @@ class HTML {
 				return ($item[0]);
 		}
 	}
-	public function initials($thread)
-	{
+	public function initials($thread){
 		$query = "SELECT username ".
 				" FROM `user`".
 				" WHERE id='".$thread."' and station_id = ".CONFIG::ID_STATION;
@@ -119,7 +116,6 @@ class HTML {
       	$out .= '</SELECT>';
        	return $out;
 	}
-	# Affiche la page structurée et gere le user
 	public function out() {
 		if (isset($this->redirect)) {
 			header("Location: ".$this->redirect);
@@ -134,12 +130,10 @@ class HTML {
 	public function h2($header) {
 		$this->body.="<h2>".$header."</h2>";
 	}
-	# DATABASE FUNCTIONS
 	public function query($query) {
 		$result = mysqli_query($this->mysqli,$query) or die($query." : ".mysqli_error($this->mysqli));
 		return $result;
 	}
-	# menuswitch
 	public function menuswitch($table,$value,$option,$selected) {
 		$sql = "select `".$value."`,`".$option."` from `".$table."` where `".$value."` is not null and station_id = ".CONFIG::ID_STATION." order by `".$option."` asc";
         $result = $this->query($sql);
@@ -154,7 +148,6 @@ class HTML {
         $out .= '</SELECT>';
         return $out;
     }
-	# FONCTION AFFICHAGE HISTORIQUE AVEC PARAMETRE DE TRI EN SQL
 	public function mag_historique($order,$show_item) {
 		# SELECTION
 		# 0 `mag_item_log`.id
@@ -283,29 +276,24 @@ $html = new html("Enterprise Resource Planning",360);
 
 ### VARIABLES GET / POST
 
-$concept = (isset($_GET['concept'])?$_GET['concept']:'PLANNING');
-$list = (isset($_GET['list'])?$_GET['list']:'ITEM');
-$page 		= (isset($_GET['page'])?$_GET['page']:"");
-$id=(isset($_POST['id'])?$_POST['id']:(isset($_GET['id'])?$_GET['id']:0));
-$category_id=(isset($_POST['category_id'])?$_POST['category_id']:(isset($_GET['category_id'])?$_GET['category_id']:-1));
-$item_id=(isset($_POST['item_id'])?$_POST['item_id']:(isset($_GET['item_id'])?$_GET['item_id']:0));
-$class_id=(isset($_POST['class_id'])?$_POST['class_id']:(isset($_GET['class_id'])?$_GET['class_id']:-1));
-$brand_id=(isset($_POST['brand_id'])?$_POST['brand_id']:(isset($_GET['brand_id'])?$_GET['brand_id']:0));
-$model_id=(isset($_POST['model_id'])?$_POST['model_id']:(isset($_GET['model_id'])?$_GET['model_id']:0));
-$area_id=(isset($_POST['area_id'])?$_POST['area_id']:(isset($_GET['area_id'])?$_GET['area_id']:-1));
-$start_rack_id=(isset($_POST['start_mag_rack_id'])?$_POST['start_mag_rack_id']:(isset($_GET['start_mag_rack_id'])?$_GET['start_mag_rack_id']:0));
-$stop_rack_id=(isset($_POST['stop_mag_rack_id'])?$_POST['stop_mag_rack_id']:(isset($_GET['stop_mag_rack_id'])?$_GET['stop_mag_rack_id']:0));
-$date_start="2021-02-02 12:00:00";
-if (isset($_POST['only_time_start'])) {
-	$date_start = date('Y-m-d H:i:s',intval($_POST['only_time_start'])+intval($_POST['only_date_start']));
-}
-if (isset($_POST['only_time_stop'])) {
-	$date_stop 	= date('Y-m-d H:i:s',intval($_POST['only_time_stop'])+intval($_POST['only_date_stop']));
-}
-$classe 	= (isset($_POST['mag_class_id'])?$_POST['mag_class_id']:-1);
-$slug 		= (isset($_POST['slug'])?$_POST['slug']:"");
-$info 		= (isset($_POST['info'])?stripslashes($_POST['info']):"");
-$scanner 		= (isset($_POST['scanner'])?$_POST['scanner']:"NO");
+$concept = 		(isset($_GET['concept'])?			$_GET['concept']:			'PLANNING');
+$list = 		(isset($_GET['list'])?				$_GET['list']:				'ITEM');
+$page= 			(isset($_GET['page'])?				$_GET['page']:				"");
+$id=			(isset($_POST['id'])?				$_POST['id']:				(isset($_GET['id'])?				$_GET['id']:				0	));
+$category_id=	(isset($_POST['category_id'])?		$_POST['category_id']:		(isset($_GET['category_id'])?		$_GET['category_id']:		-1	));
+$item_id=		(isset($_POST['item_id'])?			$_POST['item_id']:			(isset($_GET['item_id'])?			$_GET['item_id']:			0	));
+$class_id=		(isset($_POST['class_id'])?			$_POST['class_id']:			(isset($_GET['class_id'])?			$_GET['class_id']:			-1	));
+$brand_id=		(isset($_POST['brand_id'])?			$_POST['brand_id']:			(isset($_GET['brand_id'])?			$_GET['brand_id']:			0	));
+$model_id=		(isset($_POST['model_id'])?			$_POST['model_id']:			(isset($_GET['model_id'])?			$_GET['model_id']:			0	));
+$area_id=		(isset($_POST['area_id'])?			$_POST['area_id']:			(isset($_GET['area_id'])?			$_GET['area_id']:			-1	));
+$start_rack_id=	(isset($_POST['start_mag_rack_id'])?$_POST['start_mag_rack_id']:(isset($_GET['start_mag_rack_id'])?	$_GET['start_mag_rack_id']:	0	));
+$stop_rack_id=	(isset($_POST['stop_mag_rack_id'])?	$_POST['stop_mag_rack_id']:	(isset($_GET['stop_mag_rack_id'])?	$_GET['stop_mag_rack_id']:	0	));
+$date_start=	(isset($_POST['only_time_start'])?	date('Y-m-d H:i:s',intval($_POST['only_time_start'])+intval($_POST['only_date_start'])):	"2021-02-02 12:00:00");
+$date_stop=		(isset($_POST['only_time_stop'])?	date('Y-m-d H:i:s',intval($_POST['only_time_stop'])+intval($_POST['only_date_stop'])):		"");
+$classe 	= 	(isset($_POST['mag_class_id'])?		$_POST['mag_class_id']:	-1);
+$slug 		= 	(isset($_POST['slug'])?				$_POST['slug']:			"");
+$info 		= 	(isset($_POST['info'])?stripslashes($_POST['info']):		"");
+$scanner 	= 	(isset($_POST['scanner'])?			$_POST['scanner']:		"NO");
 
 ### SCANNER ACTIONS
 
@@ -345,8 +333,6 @@ $html->head.=
 	"\n".'<!--  Baptiste Cadiou  -->'.
 	"\n".'<!--  https://github.com/cadiou/  -->'."\n";
 $html->head.= "<body>";
-
-
 $html->head.='<table class="menubar"><tr><td>';
 if ($html->uid>0) {
 	if ($concept<>"RESAS") {
@@ -360,7 +346,6 @@ if ($concept<>"PLANNING") {
 }else{
 	$html->head.='<a href="?concept=PLANNING" class="menuact">PLANNING</a> ';
 }
-
 if ($concept<>"INVENTAIRE") {
 	$html->head.='<a href="?concept=INVENTAIRE" class="menubut">INVENTAIRE</a> ';
 }else{
@@ -423,8 +408,6 @@ $html->head .= $out;
 $html->head .= "</FORM>";
 $html->head.='</td>';
 $html->head.='</tr></table>';
-
-
 
 ### RESERVER
 
@@ -1465,14 +1448,14 @@ if ($concept=="INVENTAIRE"){
 		# Headers
 		$out.='
 			<th><a href="?concept=INVENTAIRE&'.($page<>""?"page=".$page."&":"").($class_id>0?"class_id=".$class_id."&":"").($model_id>0?"model_id=".$model_id."&":"").($area_id>=0?"area_id=".$area_id."&":"").($category_id>=0?"category_id=".$category_id."&":"").'order_by=mag_class.name">Classe</a></th>
+			<th><a href="?concept=INVENTAIRE&'.($page<>""?"page=".$page."&":"").($class_id>0?"class_id=".$class_id."&":"").($model_id>0?"model_id=".$model_id."&":"").($area_id>=0?"area_id=".$area_id."&":"").($category_id>=0?"category_id=".$category_id."&":"").'order_by=mag_model.description">Description</a></th>
 			<th><a href="?concept=INVENTAIRE&'.($page<>""?"page=".$page."&":"").($class_id>0?"class_id=".$class_id."&":"").($model_id>0?"model_id=".$model_id."&":"").($area_id>=0?"area_id=".$area_id."&":"").($category_id>=0?"category_id=".$category_id."&":"").'order_by=mag_brand.name">Marque</a></th>
 			<th><a href="?concept=INVENTAIRE&'.($page<>""?"page=".$page."&":"").($class_id>0?"class_id=".$class_id."&":"").($model_id>0?"model_id=".$model_id."&":"").($area_id>=0?"area_id=".$area_id."&":"").($category_id>=0?"category_id=".$category_id."&":"").'order_by=mag_model.reference">Modèle</a></th>
-			<th><a href="?concept=INVENTAIRE&'.($page<>""?"page=".$page."&":"").($class_id>0?"class_id=".$class_id."&":"").($model_id>0?"model_id=".$model_id."&":"").($area_id>=0?"area_id=".$area_id."&":"").($category_id>=0?"category_id=".$category_id."&":"").'order_by=mag_model.description">Description</a></th>
 			<th><a href="?concept=INVENTAIRE&'.($page<>""?"page=".$page."&":"").($class_id>0?"class_id=".$class_id."&":"").($model_id>0?"model_id=".$model_id."&":"").($area_id>=0?"area_id=".$area_id."&":"").($category_id>=0?"category_id=".$category_id."&":"").'order_by=mag_inventaire.tag">Etiquette</a></th>
 			<th>N° Série</th>
 			<th>Ref. Moscou</th>
-			<th><a href="?concept=INVENTAIRE&'.($page<>""?"page=".$page."&":"").($class_id>0?"class_id=".$class_id."&":"").($model_id>0?"model_id=".$model_id."&":"").($area_id>=0?"area_id=".$area_id."&":"").($category_id>=0?"category_id=".$category_id."&":"").'order_by=mag_area.name">Aire</a></th>
 			<th><a href="?concept=INVENTAIRE&'.($page<>""?"page=".$page."&":"").($class_id>0?"class_id=".$class_id."&":"").($model_id>0?"model_id=".$model_id."&":"").($area_id>=0?"area_id=".$area_id."&":"").($category_id>=0?"category_id=".$category_id."&":"").'order_by=mag_status.name">&Eacute;tat</a></th>
+			<th><a href="?concept=INVENTAIRE&'.($page<>""?"page=".$page."&":"").($class_id>0?"class_id=".$class_id."&":"").($model_id>0?"model_id=".$model_id."&":"").($area_id>=0?"area_id=".$area_id."&":"").($category_id>=0?"category_id=".$category_id."&":"").'order_by=mag_area.name">Aire</a></th>
 			</tr><tr>';
 		# Selections
 		$sql = 'SELECT 	`mag_inventaire`.id,		# 0
@@ -1544,21 +1527,20 @@ if ($concept=="INVENTAIRE"){
 		while ($item = mysqli_fetch_array($result)) {
 			$out .= '<tr class="tr_'.($item_id==$item[0]?"selected":"hover").'" onclick="window.location.href = \'?concept=INVENTAIRE&list=ITEM'.($class_id>0?'&class_id='.$class_id:'').'&item_id='.$item[0].'\'">'
 			.'<td>'.$item[1].'</td>'										# CLASS
+			.'<td>'.$item[5].'</td>'										# DESCRIPTION
 			.'<td>'.$item[3].'</td>'										# MARQUE
 			.'<td>'.$item[4].'</td>'										# REFERENCE
-			.'<td>'.$item[5].'</td>'										# DESCRIPTION
 			.'<td>'.$item[6].'</td>'										# ETIQUETTE
 			.'<td>'.$item[7].'</td>'										# N SERIE
 			.'<td>'.($item[8]==0?"":($item[8]==-1?"NC":$item[8])).'</td>'	# REF MOSCOU
-			.'<td>'.$item[12].'</td>'										# ZONE
 			.'<td class="status'.$item[14].'">'.$item[13].'</td>'			# STATUS
+			.'<td>'.$item[12].'</td>'										# ZONE
 			.'</tr>'."\n";
 		}
 		$out.='</table>';
-		#### ITEM NULL ################################################################################################################################################################
+		#### ITEM NULL = CODES SANS CODE BARRE
 	}elseif ($list=="NULL"){
 		# ENTETE CONTEXTUEL
-		
 		$out="<h1>Liste du matérie sans code-barre</h1>";
 		# LISTE DES ITEMS
 		$order_by 	= (isset($_GET['order_by'])?$_GET['order_by']:"mag_class.name");
@@ -1566,14 +1548,14 @@ if ($concept=="INVENTAIRE"){
 		# Headers
 		$out.='
 			<th><a href="?concept=INVENTAIRE&'.($page<>""?"page=".$page."&":"").($class_id>0?"class_id=".$class_id."&":"").($model_id>0?"model_id=".$model_id."&":"").($area_id>=0?"area_id=".$area_id."&":"").($category_id>=0?"category_id=".$category_id."&":"").'order_by=mag_class.name">Classe</a></th>
+			<th><a href="?concept=INVENTAIRE&'.($page<>""?"page=".$page."&":"").($class_id>0?"class_id=".$class_id."&":"").($model_id>0?"model_id=".$model_id."&":"").($area_id>=0?"area_id=".$area_id."&":"").($category_id>=0?"category_id=".$category_id."&":"").'order_by=mag_model.description">Description</a></th>
 			<th><a href="?concept=INVENTAIRE&'.($page<>""?"page=".$page."&":"").($class_id>0?"class_id=".$class_id."&":"").($model_id>0?"model_id=".$model_id."&":"").($area_id>=0?"area_id=".$area_id."&":"").($category_id>=0?"category_id=".$category_id."&":"").'order_by=mag_brand.name">Marque</a></th>
 			<th><a href="?concept=INVENTAIRE&'.($page<>""?"page=".$page."&":"").($class_id>0?"class_id=".$class_id."&":"").($model_id>0?"model_id=".$model_id."&":"").($area_id>=0?"area_id=".$area_id."&":"").($category_id>=0?"category_id=".$category_id."&":"").'order_by=mag_model.reference">Modèle</a></th>
-			<th><a href="?concept=INVENTAIRE&'.($page<>""?"page=".$page."&":"").($class_id>0?"class_id=".$class_id."&":"").($model_id>0?"model_id=".$model_id."&":"").($area_id>=0?"area_id=".$area_id."&":"").($category_id>=0?"category_id=".$category_id."&":"").'order_by=mag_model.description">Description</a></th>
 			<th><a href="?concept=INVENTAIRE&'.($page<>""?"page=".$page."&":"").($class_id>0?"class_id=".$class_id."&":"").($model_id>0?"model_id=".$model_id."&":"").($area_id>=0?"area_id=".$area_id."&":"").($category_id>=0?"category_id=".$category_id."&":"").'order_by=mag_inventaire.tag">Etiquette</a></th>
 			<th>N° Série</th>
 			<th>Ref. Moscou</th>
-			<th><a href="?concept=INVENTAIRE&'.($page<>""?"page=".$page."&":"").($class_id>0?"class_id=".$class_id."&":"").($model_id>0?"model_id=".$model_id."&":"").($area_id>=0?"area_id=".$area_id."&":"").($category_id>=0?"category_id=".$category_id."&":"").'order_by=mag_area.name">Aire</a></th>
 			<th><a href="?concept=INVENTAIRE&'.($page<>""?"page=".$page."&":"").($class_id>0?"class_id=".$class_id."&":"").($model_id>0?"model_id=".$model_id."&":"").($area_id>=0?"area_id=".$area_id."&":"").($category_id>=0?"category_id=".$category_id."&":"").'order_by=mag_status.name">&Eacute;tat</a></th>
+			<th><a href="?concept=INVENTAIRE&'.($page<>""?"page=".$page."&":"").($class_id>0?"class_id=".$class_id."&":"").($model_id>0?"model_id=".$model_id."&":"").($area_id>=0?"area_id=".$area_id."&":"").($category_id>=0?"category_id=".$category_id."&":"").'order_by=mag_area.name">Aire</a></th>
 			</tr><tr>';
 		# Selections
 		$sql = 'SELECT 	`mag_inventaire`.id,		# 0
@@ -1647,14 +1629,14 @@ if ($concept=="INVENTAIRE"){
 		while ($item = mysqli_fetch_array($result)) {
 			$out .= '<tr class="tr_'.($item_id==$item[0]?"selected":"hover").'" onclick="window.location.href = \'?concept=INVENTAIRE&list=ITEM'.($class_id>0?'&class_id='.$class_id:'').'&item_id='.$item[0].'\'">'
 			.'<td>'.$item[1].'</td>'										# CLASS
+			.'<td>'.$item[5].'</td>'										# DESCRIPTION
 			.'<td>'.$item[3].'</td>'										# MARQUE
 			.'<td>'.$item[4].'</td>'										# REFERENCE
-			.'<td>'.$item[5].'</td>'										# DESCRIPTION
 			.'<td>'.$item[6].'</td>'										# ETIQUETTE
 			.'<td>'.$item[7].'</td>'										# N SERIE
 			.'<td>'.($item[8]==0?"":($item[8]==-1?"NC":$item[8])).'</td>'	# REF MOSCOU
-			.'<td>'.$item[12].'</td>'										# ZONE
 			.'<td class="status'.$item[14].'">'.$item[13].'</td>'			# STATUS
+			.'<td>'.$item[12].'</td>'										# ZONE
 			.'</tr>'."\n";
 		}
 		$out.='</table>';
@@ -1765,11 +1747,11 @@ if ($concept=="INVENTAIRE"){
 		$result = $html->query($sql);
 		while ($item = mysqli_fetch_array($result)) {
 				$out .= '<tr class="tr_hover" onclick="window.location.href = \'?concept=INVENTAIRE&list=ITEM&model_id='.$item[4].'\'">'
-				.'<td>'.$item[0].'</td>'
-				.'<td>'.$item[1].'</td>'
-				.'<td>'.$item[2].'</td>'
-				.'<td>'.$item[6].'</td>'
-				.'<td>'.$item[3].'</td>'
+					.'<td>'.$item[0].'</td>'
+					.'<td>'.$item[1].'</td>'
+					.'<td>'.$item[2].'</td>'
+					.'<td>'.$item[6].'</td>'
+					.'<td>'.$item[3].'</td>'
 					.'</tr>'."\n";
 		}
 		$out.='</table>';
@@ -1922,12 +1904,12 @@ if ($concept=="CONTACTS"){
 		<th>info</th>
 		</tr>';
 	# Selections
-	$sql = 'SELECT 	id,				# 0
+	$sql = 'SELECT 	id,		# 0
 		name,				# 1
 		email,				# 2
 		mobile,				# 3
-		info,         			# 4
-		fonction                        # 5
+		info,         		# 4
+		fonction            # 5
 		FROM `mag_contact`';
 	$sql.= " ORDER BY name";
 	$result = $html->query($sql);
