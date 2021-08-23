@@ -1,12 +1,13 @@
 <?php
 /*
- * 210820 CADIOU.DEV
+ * 210823 CADIOU.DEV
  * RT ERP / index.php
  *
  */
 
 class HTML {
 	public function __construct($page_titre,$timeout) {
+		$this->timeout = $timeout;
 		# CONFIG
 		if (file_exists("CONFIG.class.php")) {
 			$this->check_config = include_once("CONFIG.class.php");
@@ -328,8 +329,8 @@ $html->head.= "<head>";
 	   $html->head.= CONFIG::HTML_HEADER;
  }
 $html->head.= "<title>".(isset($_GET['concept'])?$_GET['concept']:'ERP').' '.$html->station(CONFIG::ID_STATION)."</title>";
-if ($timeout>0) {
-	$html->head.= "<meta HTTP-EQUIV=\"Refresh\" CONTENT=\"".$timeout."\">";
+if ($html->timeout>0) {
+	$html->head.= "<meta HTTP-EQUIV=\"Refresh\" CONTENT=\"".$html->timeout."\">";
 }
 $html->head.=
   '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />'.
