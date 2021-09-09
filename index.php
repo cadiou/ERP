@@ -1,6 +1,6 @@
 <?php
 /*
- * 210823 CADIOU.DEV
+ * 210909 CADIOU.DEV
  * RT ERP / index.php
  *
  */
@@ -1464,17 +1464,20 @@ if ($concept=="INVENTAIRE"){
 		$order_by 	= (isset($_GET['order_by'])?$_GET['order_by']:"mag_class.name");
 		$out.="<table>";
 		# Headers
+			
 		$out.='
 			<th><a href="?concept=INVENTAIRE&'.($page<>""?"page=".$page."&":"").($class_id>0?"class_id=".$class_id."&":"").($model_id>0?"model_id=".$model_id."&":"").($area_id>=0?"area_id=".$area_id."&":"").($category_id>=0?"category_id=".$category_id."&":"").'order_by=mag_class.name">Classe</a></th>
+			<th><a href="?concept=INVENTAIRE&'.($page<>""?"page=".$page."&":"").($class_id>0?"class_id=".$class_id."&":"").($model_id>0?"model_id=".$model_id."&":"").($area_id>=0?"area_id=".$area_id."&":"").($category_id>=0?"category_id=".$category_id."&":"").'order_by=mag_model.description">Description</a></th>
 			<th><a href="?concept=INVENTAIRE&'.($page<>""?"page=".$page."&":"").($class_id>0?"class_id=".$class_id."&":"").($model_id>0?"model_id=".$model_id."&":"").($area_id>=0?"area_id=".$area_id."&":"").($category_id>=0?"category_id=".$category_id."&":"").'order_by=mag_brand.name">Marque</a></th>
 			<th><a href="?concept=INVENTAIRE&'.($page<>""?"page=".$page."&":"").($class_id>0?"class_id=".$class_id."&":"").($model_id>0?"model_id=".$model_id."&":"").($area_id>=0?"area_id=".$area_id."&":"").($category_id>=0?"category_id=".$category_id."&":"").'order_by=mag_model.reference">Modèle</a></th>
-			<th><a href="?concept=INVENTAIRE&'.($page<>""?"page=".$page."&":"").($class_id>0?"class_id=".$class_id."&":"").($model_id>0?"model_id=".$model_id."&":"").($area_id>=0?"area_id=".$area_id."&":"").($category_id>=0?"category_id=".$category_id."&":"").'order_by=mag_model.description">Description</a></th>
 			<th><a href="?concept=INVENTAIRE&'.($page<>""?"page=".$page."&":"").($class_id>0?"class_id=".$class_id."&":"").($model_id>0?"model_id=".$model_id."&":"").($area_id>=0?"area_id=".$area_id."&":"").($category_id>=0?"category_id=".$category_id."&":"").'order_by=mag_inventaire.tag">Etiquette</a></th>
 			<th>N° Série</th>
 			<th>Ref. Moscou</th>
-			<th><a href="?concept=INVENTAIRE&'.($page<>""?"page=".$page."&":"").($class_id>0?"class_id=".$class_id."&":"").($model_id>0?"model_id=".$model_id."&":"").($area_id>=0?"area_id=".$area_id."&":"").($category_id>=0?"category_id=".$category_id."&":"").'order_by=mag_area.name">Aire</a></th>
 			<th><a href="?concept=INVENTAIRE&'.($page<>""?"page=".$page."&":"").($class_id>0?"class_id=".$class_id."&":"").($model_id>0?"model_id=".$model_id."&":"").($area_id>=0?"area_id=".$area_id."&":"").($category_id>=0?"category_id=".$category_id."&":"").'order_by=mag_status.name">&Eacute;tat</a></th>
+			<th><a href="?concept=INVENTAIRE&'.($page<>""?"page=".$page."&":"").($class_id>0?"class_id=".$class_id."&":"").($model_id>0?"model_id=".$model_id."&":"").($area_id>=0?"area_id=".$area_id."&":"").($category_id>=0?"category_id=".$category_id."&":"").'order_by=mag_area.name">Aire</a></th>
 			</tr><tr>';
+		
+			
 		# Selections
 		$sql = 'SELECT 	`mag_inventaire`.id,		# 0
 			`mag_class`.name,		# 1
@@ -1544,15 +1547,26 @@ if ($concept=="INVENTAIRE"){
 		$result = $html->query($sql);
 		while ($item = mysqli_fetch_array($result)) {
 			$out .= '<tr class="tr_'.($item_id==$item[0]?"selected":"hover").'" onclick="window.location.href = \'?concept=INVENTAIRE&list=ITEM'.($class_id>0?'&class_id='.$class_id:'').'&item_id='.$item[0].'\'">'
-			.'<td>'.$item[1].'</td>'										# CLASS
-			.'<td>'.$item[3].'</td>'										# MARQUE
-			.'<td>'.$item[4].'</td>'										# REFERENCE
-			.'<td>'.$item[5].'</td>'										# DESCRIPTION
-			.'<td>'.$item[6].'</td>'										# ETIQUETTE
-			.'<td>'.$item[7].'</td>'										# N SERIE
-			.'<td>'.($item[8]==0?"":($item[8]==-1?"NC":$item[8])).'</td>'	# REF MOSCOU
-			.'<td>'.$item[12].'</td>'										# ZONE
-			.'<td class="status'.$item[14].'">'.$item[13].'</td>'			# STATUS
+			.'<td>'.$item[1].'</td>'                                                                                # CLASS
+			.'<td>'.$item[5].'</td>'                                                                                # DESCRIPTION
+			.'<td>'.$item[3].'</td>'                                                                                # MARQUE
+			.'<td>'.$item[4].'</td>'                                                                                # REFERENCE
+			.'<td>'.$item[6].'</td>'                                                                                # ETIQUETTE
+			.'<td>'.$item[7].'</td>'                                                                                # N SERIE
+			.'<td>'.($item[8]==0?"":($item[8]==-1?"NC":$item[8])).'</td>'   # REF MOSCOU
+			.'<td class="status'.$item[14].'">'.$item[13].'</td>'                   # STATUS
+			.'<td>'.$item[12].'</td>'                                                                               # ZONE
+			.'</tr>'."\n";
+			$out .= '<tr class="tr_'.($item_id==$item[0]?"selected":"hover").'" onclick="window.location.href = \'?concept=INVENTAIRE&list=ITEM'.($class_id>0?'&class_id='.$class_id:'').'&item_id='.$item[0].'\'">'
+			.'<td>'.$item[1].'</td>'                                                                                # CLASS
+			.'<td>'.$item[5].'</td>'                                                                                # DESCRIPTION
+			.'<td>'.$item[3].'</td>'                                                                                # MARQUE
+			.'<td>'.$item[4].'</td>'                                                                                # REFERENCE
+			.'<td>'.$item[6].'</td>'                                                                                # ETIQUETTE
+			.'<td>'.$item[7].'</td>'                                                                                # N SERIE
+			.'<td>'.($item[8]==0?"":($item[8]==-1?"NC":$item[8])).'</td>'   # REF MOSCOU
+			.'<td class="status'.$item[14].'">'.$item[13].'</td>'                   # STATUS
+			.'<td>'.$item[12].'</td>'                                                                               # ZONE
 			.'</tr>'."\n";
 		}
 		$out.='</table>';
