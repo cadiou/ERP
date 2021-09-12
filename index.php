@@ -367,9 +367,9 @@ if ($concept<>"INVENTAIRE") {
 		$html->head.='<a href="?concept=INVENTAIRE&list=MODEL" class="menuact">MOD&Egrave;LES</a> ';
 	}
 	if ($list<>"AREA") {
-		$html->head.='<a href="?concept=INVENTAIRE&list=AREA" class="menubut">AIRES</a> ';
+		$html->head.='<a href="?concept=INVENTAIRE&list=AREA" class="menubut">LIEUX</a> ';
 	}else{
-		$html->head.='<a href="?concept=INVENTAIRE&list=AREA" class="menuact">AIRES</a> ';
+		$html->head.='<a href="?concept=INVENTAIRE&list=AREA" class="menuact">LIEUX</a> ';
 	}
 	if ($list<>"SIM") {
 		$html->head.='<a href="?concept=INVENTAIRE&list=SIM" class="menubut">SIM</a> ';
