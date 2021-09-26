@@ -410,9 +410,7 @@ $order_by 	= 	(isset($_GET['order_by'])?$_GET['order_by']:"mag_class.name");
 
 ### SCANNER ACTIONS
 
-if ($scanner=="xxUSER0") {
-	$concept="PLANNING";
-}elseif (substr($scanner,0,4)=="USER") {
+if (substr($scanner,0,4)=="USER") {
 	$concept="RESAS";
 }elseif (substr($scanner,0,4)=="RESA") {
 	$id = substr($_POST["scanner"],4);	
@@ -922,10 +920,16 @@ if ($concept=="RESAS"){ 		######################################################
 	$html->head.= "<meta HTTP-EQUIV=\"Refresh\" CONTENT=\"30\">\n";
 	$week = substr("0".(isset($_GET['week'])?$_GET['week']:date('W')),-2);
 	$year = (isset($_GET['year'])?$_GET['year']:date('Y'));
-	$n = ((isset($_GET['n'])?$_GET['n']:2)-1);
+	#$n = ((isset($_GET['n'])?$_GET['n']:1)-1);
 	$date1 = date( "Y-m-d 00:00:00", strtotime($year."W".$week."1") ); // First day of week
 	$date2 = date( "Y-m-d 23:59:59", strtotime($year."W".$week."7+".$n."week") ); // Last day of week
-
+	if ($page=="print"){
+		$y=7;
+		$n=1;
+	}else{
+		$y=14;
+		$n=0;
+	};
 	$table = "<table>";
 
 	# NAVIGATION
@@ -934,7 +938,7 @@ if ($concept=="RESAS"){ 		######################################################
 		date("Y",strtotime($year."W".$week."7-".($n+1)."week")).'&week='.
 		date("W",strtotime($year."W".$week."7-".($n+1)."week")).
 		'">&larr;</a></td>';
-	$table.= '<td colspan=4 class="td_center" ><a href="?n='.($n+1).($page==""?'&page=compact':"").'&year='.
+	$table.= '<td colspan='.($y-3).' class="td_center" ><a href="?n='.($n+1).($page==""?'&page=compact':"").($page=="compact"?'&page=print':"").'&year='.
 		$year.'&week='.
 		$week.
 		'">'.date("Y",strtotime($year."W".$week)).'</a></td>';
@@ -945,9 +949,9 @@ if ($concept=="RESAS"){ 		######################################################
 	$table.= '</tr>';
 	
 	# JOURS DE LA SEMAINE
-	$table.='<tr><td width="12.5%"></td>';	
-	for ($i = 0; $i <7 ; $i++) {
-		$table.= '<td width="12.5%"';
+	$table.='<tr><td width="'.(100/($y+1)).'%"></td>';	
+	for ($i = 0; $i <$y ; $i++) {
+		$table.= '<td width="'.(100/($y+1)).'%"';
 		$table.= ">".strftime("%A", ($i+4)*24*3600);
 		$table.= "</td>";
 	}
@@ -978,7 +982,7 @@ if ($concept=="RESAS"){ 		######################################################
 		# BARRE DE DATES DE LA SEMAINE
 		$table.='<tr class="tr_date">';
 		$table.="<th>SEMAINE&nbsp;".date("W",strtotime($year."W".$week."7+".$i."week"))."</th>";
-		for ($j = 0;$j < 7;$j++) {
+		for ($j = 0;$j < $y;$j++) {
 			$unixdate=strtotime($year."W".$week."+".(($i*7)+$j)."day");
 			$table.="<th";
 			if (date("d M")==date( "d M", $unixdate) ) {
@@ -996,7 +1000,7 @@ if ($concept=="RESAS"){ 		######################################################
 				# AFFICAGE DE LA CLASSE
 				$table.= '<td class="td_center">'.$item_class[1]."</td>";
 				# JOURS PAR CLASSE
-				for ($j = 0;$j < 7;$j++) {
+				for ($j = 0;$j < $y;$j++) {
 					$unixdate=strtotime($year."W".$week."+".(($i*7)+$j)."day");
 					$query = "SELECT 	mag_resa.id,
 						mag_resa.slug,
@@ -2195,7 +2199,6 @@ if ($concept=="RESAS"){ 		######################################################
 		$formulaire .= PHP_EOL;
 	}
 	echo $formulaire;
-	echo $sql;
 }
 
 ?>
