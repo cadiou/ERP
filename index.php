@@ -1,13 +1,12 @@
 <?php
 /*
- * 210912 CADIOU.DEV
+ * 210926 CADIOU.DEV
  * RT ERP / index.php
  *
  */
 
 class HTML {
-	public function __construct($page_titre,$timeout) {
-		$this->timeout = $timeout;
+	public function __construct() {
 		# CONFIG
 		if (file_exists("CONFIG.class.php")) {
 			$this->check_config = include_once("CONFIG.class.php");
@@ -48,14 +47,33 @@ class HTML {
 		}else{
 			$this->terminal = "LAZARUS";
 		}
-		$this->foot = "<hr />";
-		$this->foot .= $this->group(CONFIG::ID_GROUP)." / ".CONFIG::DB_NAME." / ".gethostname();
-		$this->foot.= "</body>";
-		$this->foot.= "</html>";
+		# HEADER
+
+		if (null !== CONFIG::HTML_HEADER) {
+			$this->head.= CONFIG::HTML_HEADER."\n";
+		}
+		$this->head.= "<title>".(isset($_GET['concept'])?$_GET['concept']:'ERP').' '.$this->station(CONFIG::ID_STATION)."</title>\n";
+		
+		$this->head.=
+		'<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />'."\n".
+		'<link href="style.css" rel="stylesheet" media="all" type="text/css" />'."\n".
+		'<meta Http-Equiv="Cache-Control" Content="no-cache">'."\n".
+		'<meta Http-Equiv="Pragma" Content="no-cache">'."\n".
+		'<meta Http-Equiv="Expires" Content="0">'."\n".
+		'<meta Http-Equiv="Pragma-directive: no-cache">'."\n".
+		'<meta Http-Equiv="Cache-directive: no-cache">'."\n";
+		$this->head.=
+			'<!--  ERP RT FRANCE  -->'."\n".
+			'<!--  Baptiste CADIOU.DEV  -->'."\n".
+			'<!--  https://github.com/cadiou/  -->'."\n";
+		
+		# FOOTER
+		$this->foot = "<hr />\n";
+		$this->foot .= $this->group(CONFIG::ID_GROUP)." / ".CONFIG::DB_NAME." / ".gethostname()."\n";
 		$this->body = "";
 	}
 	public function body($text) {
-		$this->body .= "<p>".$text."</p>";
+		$this->body .= "<p>".$text."</p>\n";
 	}
 	public function user($uid) {
 		$query = "SELECT name ".
@@ -118,15 +136,102 @@ class HTML {
        	return $out;
 	}
 	public function out() {
+
+		# MENUBAR
+
+		$menubar='<table class="menubar"><tr><td>';
+		if ($this->uid>0) {
+			if ($concept<>"RESAS") {
+				$menubar.='<a href="?concept=RESAS" class="menubut">R&Eacute;SERVER</a> ';
+			}else{
+				$menubar.='<a href="?concept=RESAS" class="menuact">R&Eacute;SERVER</a> ';
+			}
+		}
+		if ($concept<>"PLANNING") {
+			$menubar.='<a href="?concept=PLANNING" class="menubut">PLANNING</a> ';
+		}else{
+			$menubar.='<a href="?concept=PLANNING" class="menuact">PLANNING</a> ';
+		}
+		if ($concept<>"INVENTAIRE") {
+			$menubar.='<a href="?concept=INVENTAIRE" class="menubut">INVENTAIRE</a> ';
+		}else{
+			$menubar.='<a href="?concept=INVENTAIRE" class="menuact">INVENTAIRE</a> ';
+			if ($list<>"CLASS") {
+				$menubar.='<a href="?concept=INVENTAIRE&list=CLASS" class="menubut">CLASSES</a> ';
+			}else{
+				$menubar.='<a href="?concept=INVENTAIRE&list=CLASS" class="menuact">CLASSES</a> ';
+			}
+			if ($list<>"BRAND") {
+				$menubar.='<a href="?concept=INVENTAIRE&list=BRAND" class="menubut">MARQUES</a> ';
+			}else{
+				$menubar.='<a href="?concept=INVENTAIRE&list=BRAND" class="menuact">MARQUES</a> ';
+			}
+			if ($list<>"MODEL") {
+				$menubar.='<a href="?concept=INVENTAIRE&list=MODEL" class="menubut">MOD&Egrave;LES</a> ';
+			}else{
+				$menubard.='<a href="?concept=INVENTAIRE&list=MODEL" class="menuact">MOD&Egrave;LES</a> ';
+			}
+			if ($list<>"AREA") {
+				$menubar.='<a href="?concept=INVENTAIRE&list=AREA" class="menubut">LIEUX</a> ';
+			}else{
+				$menubar.='<a href="?concept=INVENTAIRE&list=AREA" class="menuact">LIEUX</a> ';
+			}
+			if ($list<>"SIM") {
+				$menubar.='<a href="?concept=INVENTAIRE&list=SIM" class="menubut">SIM</a> ';
+			}else{
+				$menubar.='<a href="?concept=INVENTAIRE&list=SIM" class="menuact">SIM</a> ';
+			}
+		}
+		if ($concept<>"HISTORIQUE") {
+			$menubar.='<a href="?concept=HISTORIQUE" class="menubut">HISTORIQUE</a> ';
+		}else{
+			$menubar.='<a href="?concept=HISTORIQUE" class="menuact">HISTORIQUE</a> ';
+		}
+		if ($concept<>"CONTACTS") {
+			$menubar.='<a href="?concept=CONTACTS" class="menubut">CONTACTS</a> ';
+		}else{
+			$menubar.='<a href="?concept=CONTACTS" class="menuact">CONTACTS</a> ';
+		}
+		$menubar.='</td><td class="menusel">';
+		# LOGIN ET BARCODE
+		$menubar .= "<FORM method=\"POST\">";
+		# BARCODE
+		$menubar .= '<input type="text" id="scanner" name="scanner" size="2" placeholder="SCAN" autofocus class="scanner">';
+
+		# UTILISATEUR
+		$sql = "select `id`,`name` from user where name is not null and active = true and station_ID = ".CONFIG::ID_STATION." order by `name` asc";
+		$result = $this->query($sql);
+		$out  = '<SELECT NAME="user_id" onchange="this.form.submit()">';
+		$out .= '<OPTION VALUE="-1">Identifiez-vous !</A>';
+		while ($item = mysqli_fetch_array($result)) {
+			$out .= '<OPTION VALUE="'.$item['id'].'"';
+			if (($this->uid == $item['id'])and($this->uid != "")) {
+			$out .= " SELECTED";
+			}
+			$out .= '>'.$item['name'].'</OPTION>'."\n";
+		}
+		$out .= '</SELECT>';
+		$menubar .= $out;
+		$menubar .= "</FORM>";
+		$menubar.='</td>';
+		$menubar.='</tr></table>';
+
 		if (isset($this->redirect)) {
 			header("Location: ".$this->redirect);
 		}
+		echo "<html>\n";
+		echo "<head>\n";
 		echo $this->head;
+		echo "</head>\n";
+		echo "<body>\n";
+		echo $menubar."\n";
 		if (isset($this->info)) {
-			echo '<p class="inforow">'.$this->info.'</p>';
+			echo '<p class="inforow">'.$this->info.'</p>\n';
 		}
 		echo $this->body;
 		echo $this->foot;
+		echo "</body>\n";
+		echo "</html>";
 	}
 	public function h2($header) {
 		$this->body.="<h2>".$header."</h2>";
@@ -271,10 +376,6 @@ class HTML {
 	}
 }
 
-### CONSTRUCTION DE LA PAGE
-
-$html = new html("Enterprise Resource Planning",360);
-
 ### VARIABLES GET / POST
 
 $concept = 		(isset($_GET['concept'])?			$_GET['concept']:			'PLANNING');
@@ -309,110 +410,11 @@ if ($scanner=="USER0") {
 	$concept="FULLSCREEN";
 }
 
-### HEADER HTML ET MENUBAR
+### CONSTRUCTION DE LA PAGE
 
-$html->head = "<html>";
-$html->head.= "<head>";
-   if (null !== CONFIG::HTML_HEADER) {
-	   $html->head.= CONFIG::HTML_HEADER;
- }
-$html->head.= "<title>".(isset($_GET['concept'])?$_GET['concept']:'ERP').' '.$html->station(CONFIG::ID_STATION)."</title>";
-if ($html->timeout>0) {
-	$html->head.= "<meta HTTP-EQUIV=\"Refresh\" CONTENT=\"".$html->timeout."\">";
-}
-$html->head.=
-  '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />'.
-  '<link href="style.css" rel="stylesheet" media="all" type="text/css" />'.
-  '<meta Http-Equiv="Cache-Control" Content="no-cache">'.
-  '<meta Http-Equiv="Pragma" Content="no-cache">'.
-  '<meta Http-Equiv="Expires" Content="0">'.
-  '<meta Http-Equiv="Pragma-directive: no-cache">'.
-  '<meta Http-Equiv="Cache-directive: no-cache">'.
-  "</head>";
-$html->head.=
-	"\n".'<!--  ERP RT FRANCE  -->'.
-	"\n".'<!--  Baptiste Cadiou  -->'.
-	"\n".'<!--  https://github.com/cadiou/  -->'."\n";
-$html->head.= "<body>";
-$html->head.='<table class="menubar"><tr><td>';
-if ($html->uid>0) {
-	if ($concept<>"RESAS") {
-		$html->head.='<a href="?concept=RESAS" class="menubut">R&Eacute;SERVER</a> ';
-	}else{
-		$html->head.='<a href="?concept=RESAS" class="menuact">R&Eacute;SERVER</a> ';
-	}
-}
-if ($concept<>"PLANNING") {
-	$html->head.='<a href="?concept=PLANNING" class="menubut">PLANNING</a> ';
-}else{
-	$html->head.='<a href="?concept=PLANNING" class="menuact">PLANNING</a> ';
-}
-if ($concept<>"INVENTAIRE") {
-	$html->head.='<a href="?concept=INVENTAIRE" class="menubut">INVENTAIRE</a> ';
-}else{
-	$html->head.='<a href="?concept=INVENTAIRE" class="menuact">INVENTAIRE</a> ';
-	if ($list<>"CLASS") {
-		$html->head.='<a href="?concept=INVENTAIRE&list=CLASS" class="menubut">CLASSES</a> ';
-	}else{
-		$html->head.='<a href="?concept=INVENTAIRE&list=CLASS" class="menuact">CLASSES</a> ';
-	}
-	if ($list<>"BRAND") {
-		$html->head.='<a href="?concept=INVENTAIRE&list=BRAND" class="menubut">MARQUES</a> ';
-	}else{
-		$html->head.='<a href="?concept=INVENTAIRE&list=BRAND" class="menuact">MARQUES</a> ';
-	}
-	if ($list<>"MODEL") {
-		$html->head.='<a href="?concept=INVENTAIRE&list=MODEL" class="menubut">MOD&Egrave;LES</a> ';
-	}else{
-		$html->head.='<a href="?concept=INVENTAIRE&list=MODEL" class="menuact">MOD&Egrave;LES</a> ';
-	}
-	if ($list<>"AREA") {
-		$html->head.='<a href="?concept=INVENTAIRE&list=AREA" class="menubut">LIEUX</a> ';
-	}else{
-		$html->head.='<a href="?concept=INVENTAIRE&list=AREA" class="menuact">LIEUX</a> ';
-	}
-	if ($list<>"SIM") {
-		$html->head.='<a href="?concept=INVENTAIRE&list=SIM" class="menubut">SIM</a> ';
-	}else{
-		$html->head.='<a href="?concept=INVENTAIRE&list=SIM" class="menuact">SIM</a> ';
-	}
-}
-if ($concept<>"HISTORIQUE") {
-	$html->head.='<a href="?concept=HISTORIQUE" class="menubut">HISTORIQUE</a> ';
-}else{
-	$html->head.='<a href="?concept=HISTORIQUE" class="menuact">HISTORIQUE</a> ';
-}
-if ($concept<>"CONTACTS") {
-	$html->head.='<a href="?concept=CONTACTS" class="menubut">CONTACTS</a> ';
-}else{
-	$html->head.='<a href="?concept=CONTACTS" class="menuact">CONTACTS</a> ';
-}
-$html->head.='</td><td class="menusel">';
-# LOGIN ET BARCODE
-$html->head .= "<FORM method=\"POST\">";
-# BARCODE
-$html->head .= '<input type="text" id="scanner" name="scanner" size="2" placeholder="SCAN" autofocus class="scanner">';
-# UTILISATEUR
-$sql = "select `id`,`name` from user where name is not null and active = true and station_ID = ".CONFIG::ID_STATION." order by `name` asc";
-$result = $html->query($sql);
-$out  = '<SELECT NAME="user_id" onchange="this.form.submit()">';
-$out .= '<OPTION VALUE="-1">Identifiez-vous !</A>';
-while ($item = mysqli_fetch_array($result)) {
-	$out .= '<OPTION VALUE="'.$item['id'].'"';
-	if (($html->uid == $item['id'])and($html->uid != "")) {
-	$out .= " SELECTED";
-	}
-	$out .= '>'.$item['name'].'</OPTION>'."\n";
-}
-$out .= '</SELECT>';
-$html->head .= $out;
-$html->head .= "</FORM>";
-$html->head.='</td>';
-$html->head.='</tr></table>';
+$html = new html();
 
-### RESERVER
-
-if ($concept=="RESAS"){
+if ($concept=="RESAS"){ 		#################################################################################	RESAS
 	$order_by 	= (isset($_GET['order_by'])?$_GET['order_by']:"mag_resa.date_start");
 	if (isset($_POST['new'])) {
 		# NOUVELLE RESA = ON LA CREE ET ON RECUPERE UN ID
@@ -545,7 +547,6 @@ if ($concept=="RESAS"){
 		}
 		$out.='</table>';
 		$html->body($out);
-	
 	}
 	if ($id>0) {
 		#####################################################################
@@ -905,18 +906,16 @@ if ($concept=="RESAS"){
 		}
 
 		$html->body.= "</table>";
-
 	}
-}
+	$html->out();
+}elseif ($concept=="PLANNING"){ #################################################################################	PLANNING
+	$html->head.= "<meta HTTP-EQUIV=\"Refresh\" CONTENT=\"30\">\n";
+	$week = substr("0".(isset($_GET['week'])?$_GET['week']:date('W')),-2);
+	$year = (isset($_GET['year'])?$_GET['year']:date('Y'));
+	$n = ((isset($_GET['n'])?$_GET['n']:2)-1);
+	$date1 = date( "Y-m-d 00:00:00", strtotime($year."W".$week."1") ); // First day of week
+	$date2 = date( "Y-m-d 23:59:59", strtotime($year."W".$week."7+".$n."week") ); // Last day of week
 
-### PLANNING
-
-$week = substr("0".(isset($_GET['week'])?$_GET['week']:date('W')),-2);
-$year = (isset($_GET['year'])?$_GET['year']:date('Y'));
-$n = ((isset($_GET['n'])?$_GET['n']:2)-1);
-$date1 = date( "Y-m-d 00:00:00", strtotime($year."W".$week."1") ); // First day of week
-$date2 = date( "Y-m-d 23:59:59", strtotime($year."W".$week."7+".$n."week") ); // Last day of week
-if ($concept=="PLANNING"){
 	$table = "<table>";
 
 	# NAVIGATION
@@ -1057,11 +1056,8 @@ if ($concept=="PLANNING"){
 	}
 	$table.= "</table>";
 	$html->body($table);
-}
-
-### INVENTAIRE 
-
-if ($concept=="INVENTAIRE"){
+	$html->out();
+}elseif ($concept=="INVENTAIRE"){ ###############################################################################	INVENTAIRE
 	# SCANNER GENERAL #
 	if (($list<>"LEARN")and(isset($_POST['scanner']))) {
 		if ($_POST['scanner']=="NULL") {
@@ -1896,20 +1892,14 @@ if ($concept=="INVENTAIRE"){
 		$out.='</table>';
 	}
 	$html->body($out);
-}elseif($concept=="FULLSCREEN") {
+}elseif ($concept=="FULLSCREEN") { ##############################################################################	FULLSCREEN
 	$html->body = '<table height=100% width=100%><tr><td class="td_center"><img src="mrpropre.png"><h1>Le scanner reconnait bien les lingettes mais elles ne font pas partie de l\'inventaire !</h1>';
 	$html->body.= "</td></tr></table>";
-}
-
-# HISTORIQUE
-
-if ($concept=="HISTORIQUE"){
+	$html->out();
+}elseif ($concept=="HISTORIQUE"){ ###############################################################################	HISTORIQUE
 	$html->mag_historique("AND `mag_item_log`.active = 1 ORDER BY datetime DESC LIMIT 1000",true);
-}
-
-# CONTACTS
-
-if ($concept=="CONTACTS"){
+	$html->out();
+}elseif ($concept=="CONTACTS"){ #################################################################################	CONTACTS
 	$out="<table>";
 	# Headers
 	$out.='<tr><th>nom</th>
@@ -1939,13 +1929,8 @@ if ($concept=="CONTACTS"){
 	}
 	$out.='</table>';
 	$html->body($out);
-}
-
-### OUT
-
-if ($concept<>"RESA_OUT") {
 	$html->out();
-}else{
+}elseif ($concept=="RESA_OUT") { ################################################################################	RESA CHECKOUT
 	if ($id>0) {
 		if ($list=="ATA") {
 			header("Content-Type: text/csv; charset=UTF-8");
@@ -2146,4 +2131,5 @@ if ($concept<>"RESA_OUT") {
 		$formulaire="Il manque l'ID de la resa";
 	}
 }
+
 ?>
