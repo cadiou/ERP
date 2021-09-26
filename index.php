@@ -6,7 +6,7 @@
  */
 
 class HTML {
-	public function __construct() {
+	public function __construct($concept,$list) {
 		# CONFIG
 		if (file_exists("CONFIG.class.php")) {
 			$this->check_config = include_once("CONFIG.class.php");
@@ -50,7 +50,9 @@ class HTML {
 		# HEADER
 
 		if (null !== CONFIG::HTML_HEADER) {
-			$this->head.= CONFIG::HTML_HEADER."\n";
+			$this->head= CONFIG::HTML_HEADER."\n";
+		}else{
+			$this->head="";
 		}
 		$this->head.= "<title>".(isset($_GET['concept'])?$_GET['concept']:'ERP').' '.$this->station(CONFIG::ID_STATION)."</title>\n";
 		
@@ -70,7 +72,94 @@ class HTML {
 		# FOOTER
 		$this->foot = "<hr />\n";
 		$this->foot .= $this->group(CONFIG::ID_GROUP)." / ".CONFIG::DB_NAME." / ".gethostname()."\n";
-		$this->body = "";
+		
+
+		# MENUBAR
+
+		$menubar='<table class="menubar"><tr><td>';
+		if ($this->uid>0) {
+			if ($concept<>"RESAS") {
+				$menubar.='<a href="?concept=RESAS" class="menubut">R&Eacute;SERVER</a> ';
+			}else{
+				$menubar.='<a href="?concept=RESAS" class="menuact">R&Eacute;SERVER</a> ';
+			}
+		}
+		if ($concept<>"PLANNING") {
+			$menubar.='<a href="?concept=PLANNING" class="menubut">PLANNING</a> ';
+		}else{
+			$menubar.='<a href="?concept=PLANNING" class="menuact">PLANNING</a> ';
+		}
+		if ($concept<>"INVENTAIRE") {
+			$menubar.='<a href="?concept=INVENTAIRE" class="menubut">INVENTAIRE</a> ';
+		}else{
+			$menubar.='<a href="?concept=INVENTAIRE" class="menuact">INVENTAIRE</a> ';
+			if ($list<>"CLASS") {
+				$menubar.='<a href="?concept=INVENTAIRE&list=CLASS" class="menubut">CLASSES</a> ';
+			}else{
+				$menubar.='<a href="?concept=INVENTAIRE&list=CLASS" class="menuact">CLASSES</a> ';
+			}
+			if ($list<>"BRAND") {
+				$menubar.='<a href="?concept=INVENTAIRE&list=BRAND" class="menubut">MARQUES</a> ';
+			}else{
+				$menubar.='<a href="?concept=INVENTAIRE&list=BRAND" class="menuact">MARQUES</a> ';
+			}
+			if ($list<>"MODEL") {
+				$menubar.='<a href="?concept=INVENTAIRE&list=MODEL" class="menubut">MOD&Egrave;LES</a> ';
+			}else{
+				$menubar.='<a href="?concept=INVENTAIRE&list=MODEL" class="menuact">MOD&Egrave;LES</a> ';
+			}
+			if ($list<>"CATEGORIE") {
+				$menubar.='<a href="?concept=INVENTAIRE&list=CATEGORIE" class="menubut">CAT&Eacute;GORIE</a> ';
+			}else{
+				$menubar.='<a href="?concept=INVENTAIRE&list=CATEGORIE" class="menuact">CAT&Eacute;GORIE</a> ';
+			}
+			if ($list<>"AREA") {
+				$menubar.='<a href="?concept=INVENTAIRE&list=AREA" class="menubut">LIEU</a> ';
+			}else{
+				$menubar.='<a href="?concept=INVENTAIRE&list=AREA" class="menuact">LIEU</a> ';
+			}
+			if ($list<>"SIM") {
+				$menubar.='<a href="?concept=INVENTAIRE&list=SIM" class="menubut">SIM</a> ';
+			}else{
+				$menubar.='<a href="?concept=INVENTAIRE&list=SIM" class="menuact">SIM</a> ';
+			}
+		}
+		if ($concept<>"HISTORIQUE") {
+			$menubar.='<a href="?concept=HISTORIQUE" class="menubut">HISTORIQUE</a> ';
+		}else{
+			$menubar.='<a href="?concept=HISTORIQUE" class="menuact">HISTORIQUE</a> ';
+		}
+		if ($concept<>"CONTACTS") {
+			$menubar.='<a href="?concept=CONTACTS" class="menubut">CONTACTS</a> ';
+		}else{
+			$menubar.='<a href="?concept=CONTACTS" class="menuact">CONTACTS</a> ';
+		}
+		$menubar.='</td><td class="menusel">';
+		# LOGIN ET BARCODE
+		$menubar .= "<FORM method=\"POST\">";
+		# BARCODE
+		$menubar .= '<input type="text" id="scanner" name="scanner" size="2" placeholder="SCAN" autofocus class="scanner">';
+
+		# UTILISATEUR
+		$sql = "select `id`,`name` from user where name is not null and active = true and station_ID = ".CONFIG::ID_STATION." order by `name` asc";
+		$result = $this->query($sql);
+		$out  = '<SELECT NAME="user_id" onchange="this.form.submit()">';
+		$out .= '<OPTION VALUE="-1">Identifiez-vous !</A>';
+		while ($item = mysqli_fetch_array($result)) {
+			$out .= '<OPTION VALUE="'.$item['id'].'"';
+			if (($this->uid == $item['id'])and($this->uid != "")) {
+			$out .= " SELECTED";
+			}
+			$out .= '>'.$item['name'].'</OPTION>'."\n";
+		}
+		$out .= '</SELECT>';
+		$menubar .= $out;
+		$menubar .= "</FORM>";
+		$menubar.='</td>';
+		$menubar.='</tr></table>';
+
+		$this->body = $menubar;
+
 	}
 	public function body($text) {
 		$this->body .= "<p>".$text."</p>\n";
@@ -136,85 +225,6 @@ class HTML {
        	return $out;
 	}
 	public function out() {
-
-		# MENUBAR
-
-		$menubar='<table class="menubar"><tr><td>';
-		if ($this->uid>0) {
-			if ($concept<>"RESAS") {
-				$menubar.='<a href="?concept=RESAS" class="menubut">R&Eacute;SERVER</a> ';
-			}else{
-				$menubar.='<a href="?concept=RESAS" class="menuact">R&Eacute;SERVER</a> ';
-			}
-		}
-		if ($concept<>"PLANNING") {
-			$menubar.='<a href="?concept=PLANNING" class="menubut">PLANNING</a> ';
-		}else{
-			$menubar.='<a href="?concept=PLANNING" class="menuact">PLANNING</a> ';
-		}
-		if ($concept<>"INVENTAIRE") {
-			$menubar.='<a href="?concept=INVENTAIRE" class="menubut">INVENTAIRE</a> ';
-		}else{
-			$menubar.='<a href="?concept=INVENTAIRE" class="menuact">INVENTAIRE</a> ';
-			if ($list<>"CLASS") {
-				$menubar.='<a href="?concept=INVENTAIRE&list=CLASS" class="menubut">CLASSES</a> ';
-			}else{
-				$menubar.='<a href="?concept=INVENTAIRE&list=CLASS" class="menuact">CLASSES</a> ';
-			}
-			if ($list<>"BRAND") {
-				$menubar.='<a href="?concept=INVENTAIRE&list=BRAND" class="menubut">MARQUES</a> ';
-			}else{
-				$menubar.='<a href="?concept=INVENTAIRE&list=BRAND" class="menuact">MARQUES</a> ';
-			}
-			if ($list<>"MODEL") {
-				$menubar.='<a href="?concept=INVENTAIRE&list=MODEL" class="menubut">MOD&Egrave;LES</a> ';
-			}else{
-				$menubard.='<a href="?concept=INVENTAIRE&list=MODEL" class="menuact">MOD&Egrave;LES</a> ';
-			}
-			if ($list<>"AREA") {
-				$menubar.='<a href="?concept=INVENTAIRE&list=AREA" class="menubut">LIEUX</a> ';
-			}else{
-				$menubar.='<a href="?concept=INVENTAIRE&list=AREA" class="menuact">LIEUX</a> ';
-			}
-			if ($list<>"SIM") {
-				$menubar.='<a href="?concept=INVENTAIRE&list=SIM" class="menubut">SIM</a> ';
-			}else{
-				$menubar.='<a href="?concept=INVENTAIRE&list=SIM" class="menuact">SIM</a> ';
-			}
-		}
-		if ($concept<>"HISTORIQUE") {
-			$menubar.='<a href="?concept=HISTORIQUE" class="menubut">HISTORIQUE</a> ';
-		}else{
-			$menubar.='<a href="?concept=HISTORIQUE" class="menuact">HISTORIQUE</a> ';
-		}
-		if ($concept<>"CONTACTS") {
-			$menubar.='<a href="?concept=CONTACTS" class="menubut">CONTACTS</a> ';
-		}else{
-			$menubar.='<a href="?concept=CONTACTS" class="menuact">CONTACTS</a> ';
-		}
-		$menubar.='</td><td class="menusel">';
-		# LOGIN ET BARCODE
-		$menubar .= "<FORM method=\"POST\">";
-		# BARCODE
-		$menubar .= '<input type="text" id="scanner" name="scanner" size="2" placeholder="SCAN" autofocus class="scanner">';
-
-		# UTILISATEUR
-		$sql = "select `id`,`name` from user where name is not null and active = true and station_ID = ".CONFIG::ID_STATION." order by `name` asc";
-		$result = $this->query($sql);
-		$out  = '<SELECT NAME="user_id" onchange="this.form.submit()">';
-		$out .= '<OPTION VALUE="-1">Identifiez-vous !</A>';
-		while ($item = mysqli_fetch_array($result)) {
-			$out .= '<OPTION VALUE="'.$item['id'].'"';
-			if (($this->uid == $item['id'])and($this->uid != "")) {
-			$out .= " SELECTED";
-			}
-			$out .= '>'.$item['name'].'</OPTION>'."\n";
-		}
-		$out .= '</SELECT>';
-		$menubar .= $out;
-		$menubar .= "</FORM>";
-		$menubar.='</td>';
-		$menubar.='</tr></table>';
 
 		if (isset($this->redirect)) {
 			header("Location: ".$this->redirect);
@@ -412,7 +422,7 @@ if ($scanner=="USER0") {
 
 ### CONSTRUCTION DE LA PAGE
 
-$html = new html();
+$html = new html($concept,$list);
 
 if ($concept=="RESAS"){ 		#################################################################################	RESAS
 	$order_by 	= (isset($_GET['order_by'])?$_GET['order_by']:"mag_resa.date_start");
@@ -1892,6 +1902,7 @@ if ($concept=="RESAS"){ 		######################################################
 		$out.='</table>';
 	}
 	$html->body($out);
+	$html->out();
 }elseif ($concept=="FULLSCREEN") { ##############################################################################	FULLSCREEN
 	$html->body = '<table height=100% width=100%><tr><td class="td_center"><img src="mrpropre.png"><h1>Le scanner reconnait bien les lingettes mais elles ne font pas partie de l\'inventaire !</h1>';
 	$html->body.= "</td></tr></table>";
