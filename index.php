@@ -920,7 +920,7 @@ if ($concept=="RESAS"){ 		######################################################
 	$html->head.= "<meta HTTP-EQUIV=\"Refresh\" CONTENT=\"30\">\n";
 	$week = substr("0".(isset($_GET['week'])?$_GET['week']:date('W')),-2);
 	$year = (isset($_GET['year'])?$_GET['year']:date('Y'));
-	#$n = ((isset($_GET['n'])?$_GET['n']:1)-1);
+	$n = ((isset($_GET['n'])?$_GET['n']:1)-1);
 	$date1 = date( "Y-m-d 00:00:00", strtotime($year."W".$week."1") ); // First day of week
 	$date2 = date( "Y-m-d 23:59:59", strtotime($year."W".$week."7+".$n."week") ); // Last day of week
 	if ($page=="print"){
