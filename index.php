@@ -488,81 +488,13 @@ if ($concept=="RESAS"){ 		######################################################
         }
 	}
 	
-	if ($list<>"ADD" and $list<>"REMOVE") {
-	
-		$out="<h1>R&eacute;servations</h1>";
-		#### LISTE DES RESERVATIONS ##################################################################
-		$out.="<table>";
-		# Headers
-		$out.='	<th colspan="2"><a href="?concept=RESAS&'.($page<>""?"page=".$page."&":"").'order_by=mag_resa.date_start">D&eacute;part</a></th>
-			<th colspan="2"><a href="?concept=RESAS&'.($page<>""?"page=".$page."&":"").'order_by=mag_resa.date_stop">Arrivée</a></th>
-			<th>Classe</th>
-			<th>Titulaire</th>
-			<th><a href="?concept=RESAS&'.($page<>""?"page=".$page."&":"").'order_by=mag_resa.slug">Tournage</a></th>
-			<th><a href="?concept=RESAS&'.($page<>""?"page=".$page."&":"").'order_by=mag_resa.level">&Eacute;tape</a></th>
-			</tr><tr>';
-		# Selections
-		$sql = 'SELECT 	`mag_resa`.`id`,
-			`mag_resa`.`slug`,
-			`mag_resa`.`date_start`,
-			`mag_resa`.`date_stop`,
-			`mag_phase`.`name`,
-			`mag_resa`.`level`,
-			`mag_phase`.`name`,
-			`mag_resa`.`start_rack_id`,
-			`mag_resa`.`stop_rack_id`,
-			`mag_resa`.`contact_id`
-			FROM mag_resa,mag_phase ';
-		$sql.= ' WHERE mag_resa.level = mag_phase.id and mag_resa.level<>6 ';
-		# CLAUSE ORDER BY
-		if ($order_by == "mag_resa.date_start" or $order_by == "") {
-			$sql.= " ORDER BY mag_resa.date_start ASC,mag_resa.date_stop ASC";
-		}elseif ($order_by == "mag_resa.date_stop") {
-			$sql.= " ORDER BY mag_resa.date_stop";
-		}elseif ($order_by == "mag_resa.slug") {
-			$sql.= " ORDER BY mag_resa.slug";
-		}elseif ($order_by == "mag_resa.level") {
-			$sql.= " ORDER BY mag_resa.level DESC";
-		}
-		$result =  $html->query($sql);
-		while ($item = mysqli_fetch_array($result)) {
-			$out .= '<tr class="tr_'.($id==$item[0]?"selected":"hover").'" onclick="window.location.href = \'?concept=RESAS&id='.$item[0].'\'">'
-			.'<td>'.$item[2].'</td>'
-			.'<td>'.$html->rack_name($item[7]).'</td>'
-			.'<td>'.$item[3].'</td>'
-			.'<td>'.$html->rack_name($item[8]).'</td>'
-			.'<td>'.$html->class_resa($item[0]).'</td>'
-			.'<td>'.$html->contact_name($item[9]).'</td>'
-			.'<td>'.$item[1].'</td>'
-			.'<td  class="level';
-			if ($item[5]==0) {
-				$out.= "0";
-			}elseif ($item[5]==1) {
-				$out.= "0";
-			}elseif ($item[5]==2) {
-				$out.= "1";
-			}elseif ($item[5]==3) {
-				$out.= "3";
-			}elseif ($item[5]==4) {
-				$out.= "4";
-			}elseif ($item[5]==5) {
-				$out.= "2";
-			}elseif ($item[5]==6) {
-				$out.= "5";
-			}
-			$out.= "\">";
-			$out.=$item[6].'</td>'
-				.'</tr>'."\n";
-		}
-		$out.='</table>';
-		$html->body($out);
-	}
 	if ($id>0) {
 		#####################################################################
 		# LA RESA EXISTE ET NOUS ALLONS LA MODIFIER
 		$query = "SELECT id,level,date_start,date_stop,contact_id,user_id,info,slug,start_rack_id,stop_rack_id FROM mag_resa WHERE id=".$id;
 		$result =  $html->query($query);
 		$item = mysqli_fetch_array($result);
+		$level=$item[1];
 		if ($html->uid==-1) {
 			$html->body.="<span class=\"level1\">Pour modifier une réservation il faut être identifié. Merci.</span>";
 		}else{
@@ -672,7 +604,25 @@ if ($concept=="RESAS"){ 		######################################################
 				$formulaire.= "5";
 			}
 			$formulaire.= "\">";
-			$formulaire.= $html->menuswitch("mag_phase","id" ,"name",$item[1]);
+		#	$formulaire.= $html->menuswitch("mag_phase","id" ,"name",$item[1]);
+			$formulaire.='<SELECT NAME="mag_phase_id" onchange="this.form.submit()">';
+		#	$formulaire.='<OPTION VALUE="1" >RESET</OPTION>';
+			if ($level<=2) {
+				$formulaire.='<OPTION VALUE="1" '.($level==1?"SELECTED":"").'>1-Prévisionnelle</OPTION>';
+				$formulaire.='<OPTION VALUE="2" '.($level==2?"SELECTED":"").'>2-Confirmée - À préparer</OPTION>';
+			}
+			if ($level>=2 and $level<=3) {
+				$formulaire.='<OPTION VALUE="3" '.($level==3?"SELECTED":"").'>3-Armoire départ</OPTION>';
+			}
+			if ($level>=3 and $level<=4) {
+				$formulaire.='<OPTION VALUE="4" '.($level==4?"SELECTED":"").'>4-En cours</OPTION>';
+			}
+			if ($level>=4 and $level<=5) {
+				$formulaire.='<OPTION VALUE="5" '.($level==5?"SELECTED":"").'>5-Armoire retour</OPTION>';
+			}
+			if ($level>=6 and $level<=6) {
+				$formulaire.='<OPTION VALUE="6" '.($level==6?"SELECTED":"").'>6-Vérifiée</OPTION></SELECT>';
+			}
 			$formulaire.= "</td></tr>";
 			# TOURNAGE #######################################################################
 			$formulaire.= '<tr><td>Tournage&nbsp;:</td><td colspan="3">';
@@ -690,11 +640,23 @@ if ($concept=="RESAS"){ 		######################################################
 			############## SCANNER IN OUT
 			
 			if (isset($_POST['scanner'])) {
-				if (($_POST['scanner']=="ADD") and $html->uid>0 ) {
-					$html->redirect="?concept=RESAS&list=ADD&id=".$id;
-				}elseif (($_POST['scanner']=="REMOVE") and $html->uid>0 ) {
-					$html->redirect="?concept=RESAS&list=REMOVE&id=".$id;
+				if ($_POST['scanner']=="ADD") {
+					if ($html->uid>0 and $level<=3) {
+						$html->redirect="?concept=RESAS&list=ADD&id=".$id;
+					}else{
+						$html->redirect="?concept=RESAS&id=".$id;
+					}
+				}elseif ($_POST['scanner']=="REMOVE") {
+					if ($html->uid>0 and $level<=3) {
+						$html->redirect="?concept=RESAS&list=REMOVE&id=".$id;
+					}else{
+						$html->redirect="?concept=RESAS&id=".$id;
+					}
 				}elseif ($_POST['scanner']=="CANCEL"){
+					$html->redirect="?concept=RESAS&id=".$id;
+				}elseif ($_POST['scanner']=="CLOSE") {
+					$query="UPDATE mag_resa SET level=6 WHERE id=".$id;
+					$result =  $html->query($query);
 					$html->redirect="?concept=RESAS&id=".$id;
 				}else{
 					if ($list=="LEARN") {
@@ -747,11 +709,30 @@ if ($concept=="RESAS"){ 		######################################################
 						}else{
 							$html->info = "Objet absent de la base";
 						}
+					}elseif ($level ==5){
+						$query_bar = "SELECT id FROM mag_inventaire WHERE barcode ='".$_POST['scanner']."'";
+						$result_bar =  $html->query($query_bar);
+						if (mysqli_num_rows($result_bar)!=0) {
+							$item_bar = mysqli_fetch_array($result_bar);
+							$query = "UPDATE mag_resa_item SET verified=1 WHERE item_id=".$item_bar[0]." and resa_id=".$id;
+							$result =  $html->query($query);
+							# MAINTENANT QU ON A CHECKE ON REGARDE COMBIEN IL EN RESTE
+							$query = "SELECT count(*) FROM mag_resa_item WHERE resa_id=".$id." and verified=0";
+							$result =  $html->query($query);
+							$item_count = mysqli_fetch_array($result);
+							if ($item_count[0]==0) {
+								$query="UPDATE mag_resa SET level=6 WHERE id=".$id;
+								$result =  $html->query($query);
+								$html->redirect="?concept=RESAS&id=".$id;
+							}
+						}else{
+							$html->info = "Objet absent de la base";
+						}
 					}
 				}
 			}
 			if ($list<>"ADD" and $list<>"REMOVE") {
-				$formulaire.= $html->menuselect("mag_class","id" ,"name",$classe);
+				# $formulaire.= $html->menuselect("mag_class","id" ,"name",$classe);
 				# LISTE DU MATERIEL DE LA CLASSE DISPONIBLE
 				if ($classe > 0) {				
 					$sql = 'SELECT  a.id,
@@ -800,8 +781,16 @@ if ($concept=="RESAS"){ 		######################################################
 						$formulaire.= " Cettre classe ne contient pas d'objet disponible.";
 					}
 				}	
-			}else{
-				$formulaire.= '<img src="barcodescanning.gif">';
+			}
+
+			# INDICATION DU BARCODE
+
+			if ($list=="ADD") {
+				$formulaire.= '<img src="https://webviewersolutions.com/images/barcodescanning.gif"><span class="bouton_in">SCANNEZ POUR AJOUTER</span>';
+			}elseif ($list=="REMOVE") {
+				$formulaire.= '<img src="https://webviewersolutions.com/images/barcodescanning.gif"><span class="bouton_out">SCANNEZ POUR RETIRER</span>';
+			}elseif ($level==5) {
+				$formulaire.= '<img src="https://webviewersolutions.com/images/barcodescanning.gif"><span class="bouton_in">SCANNEZ POUR VERIFIER</span>';
 			}
 			
 			
@@ -814,7 +803,9 @@ if ($concept=="RESAS"){ 		######################################################
 					a.`serial`,
 					a.`refMoscou`,
 					a.`model_id`,
-					mag_class.name
+					mag_class.name,
+					a.barcode,
+					mag_resa_item.verified
 					FROM `mag_inventaire` AS a,`mag_model`,`mag_brand`,mag_resa_item,mag_class ';
 			$sql.= 'WHERE `mag_model`.`id`=a.`model_id` and
 					`mag_brand`.`id`=`mag_model`.`brand_id` and mag_class.id = a.class_id and ';
@@ -824,11 +815,11 @@ if ($concept=="RESAS"){ 		######################################################
 			$sql.= " ORDER BY mag_brand.name,mag_model.reference";
 			$result = $html->query($sql);
 			if (mysqli_num_rows($result)!=0) {
-					$formulaire.= "<h2>Attribué</h2>";
-					$formulaire.= '<input type="submit" value="Retirer de la liste"  class="bouton_out" >';
+				#	$formulaire.= "<h2>Attribué</h2>";
+				 #	$formulaire.= '<input type="submit" value="Retirer de la liste"  class="bouton_out" >';
 					$formulaire.=   '<p><table>';
 					# Headers
-					$formulaire.='<tr><th></th>
+					$formulaire.='<tr><!--th></th-->
 							<th>Marque</th>
 							<th>Modèle</th>
 							<th>Description</th>
@@ -836,23 +827,30 @@ if ($concept=="RESAS"){ 		######################################################
 							<th>N° Série</th>
 							<th>Ref. Moscou</th>
 							<th>Classe</th>
-							</tr>';
+							<th>Code barre</th>';
+					if ($level>=5) {
+						$formulaire.='<th>Vérifié</th>';
+					}
+					$formulaire.='</tr>';
 					while ($item = mysqli_fetch_array($result)) {
-									$formulaire .= '<tr class="tr_hover">'
-									.'<td><input type="checkbox" name="rem_from_resa_item[]" value='.$item[0].'></td>'
+						$formulaire .= '<tr class="tr_hover" onclick="window.location.href = \'?concept=INVENTAIRE&item_id='.$item[0].'\'">'
+									.'<!--td><input type="checkbox" name="rem_from_resa_item[]" value='.$item[0].'></td-->'
 									.'<td>'.$item[1].'</td>'
 									.'<td>'.$item[2].'</td>'
 									.'<td>'.$item[3].'</td>'
-									.'<td><a href="mag_item.php?id='.$item[0].'">'.$item[4].'</a></td>'
-									.'<td><a href="mag_item.php?id='.$item[0].'">'.$item[5].'</a></td>'
-									.'<td><a href="mag_item.php?id='.$item[0].'">'.($item[6]==0?"":($item[6]==-1?"NC":$item[6])).'</a></td>'
+									.'<td><a href="?concept=INVENTAIRE&item_id='.$item[0].'">'.$item[4].'</a></td>'
+									.'<td><a href="?concept=INVENTAIRE&item_id='.$item[0].'">'.$item[5].'</a></td>'
+									.'<td><a href="?concept=INVENTAIRE&item_id='.$item[0].'">'.($item[6]==0?"":($item[6]==-1?"NC":$item[6])).'</a></td>'
 									.'<td>'.$item[8].'</td>'
+									.'<td>'.$item[9].'</td>'
+									.($level>=5?'<td><input type="checkbox" name="verified" value='.$item[0].' '.($item[10]==1?"CHECKED":"").'></td>':"")
 									.'</tr>'."\n";
 					}
 					$formulaire.= "</table>";
-					$formulaire.= '<h2></h2>';
-					$formulaire.= '<table class="menubar"><tr height="50"><th><a class="menubut" href="?concept=RESA_OUT&list=print&id='.$id.'">Fiche de sortie</a></th>';
-					$formulaire.= '<th><a class="menubut" href="?concept=RESA_OUT&list=ATA&id='.$id.'">Carnet ATA</a></th></tr></table>';
+					if ($level>=3) {
+						$formulaire.= '<table class="menubar"><tr height="50"><th><a class="menubut" href="?concept=RESA_OUT&list=print&id='.$id.'">Fiche de sortie</a></th>';
+						$formulaire.= '<th><a class="menubut" href="?concept=RESA_OUT&list=ATA&id='.$id.'">Carnet ATA</a></th></tr></table>';
+					}
 			}else{
 					$formulaire.= " Sélectionner une classe pour choisir du matériel.";
 			}
@@ -865,52 +863,104 @@ if ($concept=="RESAS"){ 		######################################################
 		}
 		$html->body.= "";
 	} else {
-	# LA RESA N'EXISTE PAS DONC ON PREPARE UN FORMULAIRE
+		$out="<h1>R&eacute;servations</h1>";
+		#### LISTE DES RESERVATIONS ##################################################################
+		$out.="<table>";
+		# Headers
+		$out.='	<th colspan="2"><a href="?concept=RESAS&'.($page<>""?"page=".$page."&":"").'order_by=mag_resa.date_start">D&eacute;part</a></th>
+			<th colspan="2"><a href="?concept=RESAS&'.($page<>""?"page=".$page."&":"").'order_by=mag_resa.date_stop">Arrivée</a></th>
+			<th>Classe</th>
+			<th>Titulaire</th>
+			<th><a href="?concept=RESAS&'.($page<>""?"page=".$page."&":"").'order_by=mag_resa.slug">Tournage</a></th>
+			<th><a href="?concept=RESAS&'.($page<>""?"page=".$page."&":"").'order_by=mag_resa.level">&Eacute;tape</a></th>
+			</tr><tr>';
+		# Selections
+		$sql = 'SELECT 	`mag_resa`.`id`,
+			`mag_resa`.`slug`,
+			`mag_resa`.`date_start`,
+			`mag_resa`.`date_stop`,
+			`mag_phase`.`name`,
+			`mag_resa`.`level`,
+			`mag_phase`.`name`,
+			`mag_resa`.`start_rack_id`,
+			`mag_resa`.`stop_rack_id`,
+			`mag_resa`.`contact_id`
+			FROM mag_resa,mag_phase ';
+		$sql.= ' WHERE mag_resa.level = mag_phase.id and mag_resa.level<>6 ';
+		# CLAUSE ORDER BY
+		if ($order_by == "mag_resa.date_start" or $order_by == "") {
+			$sql.= " ORDER BY mag_resa.date_start ASC,mag_resa.date_stop ASC";
+		}elseif ($order_by == "mag_resa.date_stop") {
+			$sql.= " ORDER BY mag_resa.date_stop";
+		}elseif ($order_by == "mag_resa.slug") {
+			$sql.= " ORDER BY mag_resa.slug";
+		}elseif ($order_by == "mag_resa.level") {
+			$sql.= " ORDER BY mag_resa.level DESC";
+		}
+		$result =  $html->query($sql);
+		while ($item = mysqli_fetch_array($result)) {
+			$out .= '<tr class="tr_'.($id==$item[0]?"selected":"hover").'" onclick="window.location.href = \'?concept=RESAS&id='.$item[0].'\'">'
+			.'<td>'.$item[2].'</td>'
+			.'<td>'.$html->rack_name($item[7]).'</td>'
+			.'<td>'.$item[3].'</td>'
+			.'<td>'.$html->rack_name($item[8]).'</td>'
+			.'<td>'.$html->class_resa($item[0]).'</td>'
+			.'<td>'.$html->contact_name($item[9]).'</td>'
+			.'<td>'.$item[1].'</td>'
+			.'<td  class="level';
+			if ($item[5]==0) {
+				$out.= "0";
+			}elseif ($item[5]==1) {
+				$out.= "0";
+			}elseif ($item[5]==2) {
+				$out.= "1";
+			}elseif ($item[5]==3) {
+				$out.= "3";
+			}elseif ($item[5]==4) {
+				$out.= "4";
+			}elseif ($item[5]==5) {
+				$out.= "2";
+			}elseif ($item[5]==6) {
+				$out.= "5";
+			}
+			$out.= "\">";
+			$out.=$item[6].'</td>'
+				.'</tr>'."\n";
+		}
+		$out.='</table>';
+		$html->body($out);
+		# LA RESA N'EXISTE PAS DONC ON PREPARE UN FORMULAIRE
 		$html->body.= "<table width=\"100%\">";
 		if ($html->uid==-1) {
-
 			$html->body.="<tr><td class=\"level1\">Pour créer une réservation il faut être identifié. Merci.</td></tr>";
-
 		}else{
-
 			$html->body.= "<h1>Nouvelle réservation</h1>";
-
 			$formulaire = '<form enctype="multipart/form-data" method="post">';
 
 			# NEW
 			$formulaire .= '<input type="hidden" name="new" value="new">';
 
 			# DATE ET HEURE START ##################################################################
-
 			$formulaire.= "<tr><td>Départ&nbsp;:</td><td>";
-
 			$formulaire.= '<SELECT NAME="only_date_start" onchange="this.form.submit()">';
 
 			for ($i = 0; $i <= 90; $i++) {
 				$formulaire.= '<OPTION VALUE="'.
 					mktime(0, 0, 0, date("m"), date("d")+$i, date("Y")).
 						'" '.($i==0?" SELECTED":"").'>'.
-						strftime("%A %e %b %Y", mktime(0, 0, 0, date("m"), date("d")+$i, date("Y"))).'</OPTION>';
-				}
-
+					strftime("%A %e %b %Y", mktime(0, 0, 0, date("m"), date("d")+$i, date("Y"))).'</OPTION>';
+			}
             $formulaire .= '</SELECT>';
-
             $formulaire.= '<SELECT NAME="only_time_start" onchange="this.form.submit()">';
-
             for ($i = 0; $i <= 48; $i++) {
                 $formulaire.= '<OPTION VALUE="'.strval($i*30*60).'" '.($i==13?" SELECTED":"").'>'.
                     date('H:i',mktime(0, 30*$i, 0, 1, 1, 1)).
 					'</OPTION>';
             }
-
             $formulaire .= '</SELECT>';
-
 			$formulaire .= '</form>';
-
 			$formulaire .= '</td></tr>';
-
 			$html->body.= $formulaire;
-
 		}
 
 		$html->body.= "</table>";
@@ -2084,9 +2134,8 @@ if ($concept=="RESAS"){ 		######################################################
 							<!--th>N° Série</th-->
 							<!--th>Ref. Moscou</th-->
 							<!--th>Classe</th-->
-							<th>Sortie</th>
-							<th>Retour</th>
-								</tr>';
+							<th></th>
+							</tr>';
 					while ($item = mysqli_fetch_array($result)) {
 						$formulaire .= '<tr>'
 						.'<td>'.$item[1].'</td>'
@@ -2097,7 +2146,6 @@ if ($concept=="RESAS"){ 		######################################################
 						.'<!--td>'.($item[6]==0?"":($item[6]==-1?"":$item[6])).'</td-->'
 						.'<!--td class="tableau">'.$item[8].'</td-->'
 						.'<!--td class="tableau"></td-->'
-						.'<td class="tableau"></td>'
 						.'</tr>'."\n";
 					}
 					$formulaire.= "</table>";
