@@ -76,89 +76,88 @@ class HTML {
 
 		# MENUBAR
 
-		$menubar='<table class="menubar"><tr><td>';
+		$this->menu='<table class="menubar"><tr><td>';
 		if ($this->uid>0) {
 			if ($concept<>"RESAS") {
-				$menubar.='<a href="?concept=RESAS" class="menubut">R&Eacute;SERVER</a> ';
+				$this->menu.='<a href="?concept=RESAS" class="menubut">R&Eacute;SERVER</a> ';
 			}else{
-				$menubar.='<a href="?concept=RESAS" class="menuact">R&Eacute;SERVER</a> ';
+				$this->menu.='<a href="?concept=RESAS" class="menuact">R&Eacute;SERVER</a> ';
 			}
 		}
 		if ($concept<>"PLANNING") {
-			$menubar.='<a href="?concept=PLANNING" class="menubut">PLANNING</a> ';
+			$this->menu.='<a href="?concept=PLANNING" class="menubut">PLANNING</a> ';
 		}else{
-			$menubar.='<a href="?concept=PLANNING" class="menuact">PLANNING</a> ';
+			$this->menu.='<a href="?concept=PLANNING" class="menuact">PLANNING</a> ';
 		}
 		if ($concept<>"INVENTAIRE") {
-			$menubar.='<a href="?concept=INVENTAIRE" class="menubut">INVENTAIRE</a> ';
+			$this->menu.='<a href="?concept=INVENTAIRE" class="menubut">INVENTAIRE</a> ';
 		}else{
-			$menubar.='<a href="?concept=INVENTAIRE" class="menuact">INVENTAIRE</a> ';
+			$this->menu.='<a href="?concept=INVENTAIRE" class="menuact">INVENTAIRE</a> ';
 			if ($list<>"CLASS") {
-				$menubar.='<a href="?concept=INVENTAIRE&list=CLASS" class="menubut">CLASSES</a> ';
+				$this->menu.='<a href="?concept=INVENTAIRE&list=CLASS" class="menubut">CLASSES</a> ';
 			}else{
-				$menubar.='<a href="?concept=INVENTAIRE&list=CLASS" class="menuact">CLASSES</a> ';
+				$this->menu.='<a href="?concept=INVENTAIRE&list=CLASS" class="menuact">CLASSES</a> ';
 			}
 			if ($list<>"BRAND") {
-				$menubar.='<a href="?concept=INVENTAIRE&list=BRAND" class="menubut">MARQUES</a> ';
+				$this->menu.='<a href="?concept=INVENTAIRE&list=BRAND" class="menubut">MARQUES</a> ';
 			}else{
-				$menubar.='<a href="?concept=INVENTAIRE&list=BRAND" class="menuact">MARQUES</a> ';
+				$this->menu.='<a href="?concept=INVENTAIRE&list=BRAND" class="menuact">MARQUES</a> ';
 			}
 			if ($list<>"MODEL") {
-				$menubar.='<a href="?concept=INVENTAIRE&list=MODEL" class="menubut">MOD&Egrave;LES</a> ';
+				$this->menu.='<a href="?concept=INVENTAIRE&list=MODEL" class="menubut">MOD&Egrave;LES</a> ';
 			}else{
-				$menubar.='<a href="?concept=INVENTAIRE&list=MODEL" class="menuact">MOD&Egrave;LES</a> ';
+				$this->menu.='<a href="?concept=INVENTAIRE&list=MODEL" class="menuact">MOD&Egrave;LES</a> ';
 			}
 			if ($list<>"CATEGORIE") {
-				$menubar.='<a href="?concept=INVENTAIRE&list=CATEGORIE" class="menubut">CAT&Eacute;GORIE</a> ';
+				$this->menu.='<a href="?concept=INVENTAIRE&list=CATEGORIE" class="menubut">CAT&Eacute;GORIE</a> ';
 			}else{
-				$menubar.='<a href="?concept=INVENTAIRE&list=CATEGORIE" class="menuact">CAT&Eacute;GORIE</a> ';
+				$this->menu.='<a href="?concept=INVENTAIRE&list=CATEGORIE" class="menuact">CAT&Eacute;GORIE</a> ';
 			}
 			if ($list<>"AREA") {
-				$menubar.='<a href="?concept=INVENTAIRE&list=AREA" class="menubut">LIEU</a> ';
+				$this->menu.='<a href="?concept=INVENTAIRE&list=AREA" class="menubut">LIEU</a> ';
 			}else{
-				$menubar.='<a href="?concept=INVENTAIRE&list=AREA" class="menuact">LIEU</a> ';
+				$this->menu.='<a href="?concept=INVENTAIRE&list=AREA" class="menuact">LIEU</a> ';
 			}
 			if ($list<>"SIM") {
-				$menubar.='<a href="?concept=INVENTAIRE&list=SIM" class="menubut">SIM</a> ';
+				$this->menu.='<a href="?concept=INVENTAIRE&list=SIM" class="menubut">SIM</a> ';
 			}else{
-				$menubar.='<a href="?concept=INVENTAIRE&list=SIM" class="menuact">SIM</a> ';
+				$this->menu.='<a href="?concept=INVENTAIRE&list=SIM" class="menuact">SIM</a> ';
 			}
 		}
 		if ($concept<>"HISTORIQUE") {
-			$menubar.='<a href="?concept=HISTORIQUE" class="menubut">HISTORIQUE</a> ';
+			$this->menu.='<a href="?concept=HISTORIQUE" class="menubut">HISTORIQUE</a> ';
 		}else{
-			$menubar.='<a href="?concept=HISTORIQUE" class="menuact">HISTORIQUE</a> ';
+			$this->menu.='<a href="?concept=HISTORIQUE" class="menuact">HISTORIQUE</a> ';
 		}
 		if ($concept<>"CONTACTS") {
-			$menubar.='<a href="?concept=CONTACTS" class="menubut">CONTACTS</a> ';
+			$this->menu.='<a href="?concept=CONTACTS" class="menubut">CONTACTS</a> ';
 		}else{
-			$menubar.='<a href="?concept=CONTACTS" class="menuact">CONTACTS</a> ';
+			$this->menu.='<a href="?concept=CONTACTS" class="menuact">CONTACTS</a> ';
 		}
-		$menubar.='</td><td class="menusel">';
+		$this->menu.='</td><td class="menusel">';
 		# LOGIN ET BARCODE
-		$menubar .= "<FORM method=\"POST\">";
+		$this->menu .= "<FORM method=\"POST\">";
 		# BARCODE
-		$menubar .= '<input type="text" id="scanner" name="scanner" size="2" placeholder="SCAN" autofocus class="scanner">';
+		$this->menu .= '<input type="text" id="scanner" name="scanner" size="2" placeholder="SCAN" autofocus class="scanner">';
 
 		# UTILISATEUR
 		$sql = "select `id`,`name` from user where name is not null and active = true and station_ID = ".CONFIG::ID_STATION." order by `name` asc";
 		$result = $this->query($sql);
-		$out  = '<SELECT NAME="user_id" onchange="this.form.submit()">';
-		$out .= '<OPTION VALUE="-1">Identifiez-vous !</A>';
+		$this->menu .= '<SELECT NAME="user_id" onchange="this.form.submit()">';
+		$this->menu .= '<OPTION VALUE="-1">Identifiez-vous !</A>';
 		while ($item = mysqli_fetch_array($result)) {
-			$out .= '<OPTION VALUE="'.$item['id'].'"';
+			$this->menu .= '<OPTION VALUE="'.$item['id'].'"';
 			if (($this->uid == $item['id'])and($this->uid != "")) {
-			$out .= " SELECTED";
+			$this->menu .= " SELECTED";
 			}
-			$out .= '>'.$item['name'].'</OPTION>'."\n";
+			$this->menu .= '>'.$item['name'].'</OPTION>'."\n";
 		}
-		$out .= '</SELECT>';
-		$menubar .= $out;
-		$menubar .= "</FORM>";
-		$menubar.='</td>';
-		$menubar.='</tr></table>';
+		$this->menu .= '</SELECT>';
+		$this->menu .= "</FORM>";
+		$this->menu.='</td>';
+		$this->menu.='</tr></table>';
 
-		$this->body = $menubar;
+		$this->body = "";
 
 	}
 	public function body($text) {
@@ -234,7 +233,7 @@ class HTML {
 		echo $this->head;
 		echo "</head>\n";
 		echo "<body>\n";
-		echo $menubar."\n";
+		echo $this->menu;
 		if (isset($this->info)) {
 			echo '<p class="inforow">'.$this->info.'</p>\n';
 		}
@@ -409,7 +408,7 @@ $scanner 	= 	(isset($_POST['scanner'])?			$_POST['scanner']:		"NO");
 
 ### SCANNER ACTIONS
 
-if ($scanner=="USER0") {
+if ($scanner=="xxUSER0") {
 	$concept="PLANNING";
 }elseif (substr($scanner,0,4)=="USER") {
 	$concept="RESAS";
