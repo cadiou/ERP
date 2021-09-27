@@ -852,7 +852,9 @@ if ($concept=="RESAS"){ 		######################################################
 						$formulaire.= '<th><a class="menubut" href="?concept=RESA_OUT&list=ATA&id='.$id.'">Carnet ATA</a></th></tr></table>';
 					}
 			}else{
-					$formulaire.= " Sélectionner une classe pour choisir du matériel.";
+				if ($list<>"ADD") {
+					$html->redirect="?concept=RESAS&list=ADD&id=".$id;
+				}
 			}
 			
 			
