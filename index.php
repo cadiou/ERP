@@ -1106,7 +1106,7 @@ if ($concept=="RESAS"){ 		######################################################
 							$time.= "<br>";
 							}
 							$table.="<table><tr class=\"tr_planning\"><td class=\"etape_planning".$item[4]."\" onclick=\"window.location.href = '".
-								($html->uid==-1?"mag_resa_print.php?id=".$item[0]:"?concept=RESAS&id=".$item[0]."&n=".($n+1)."&year=".$year."&week=".$week).
+								($html->uid==-1?"?concept=RESA_OUT&list=print&id=".$item[0]:"?concept=RESAS&id=".$item[0]."&n=".($n+1)."&year=".$year."&week=".$week).
 								"'\">";
 
 							$table.= "<!--a href=\"?concept=RESAS&id=".$item[0]."&n=".($n+1)."&year=".$year."&week=".$week."\"--><p>";
@@ -2054,14 +2054,16 @@ if ($concept=="RESAS"){ 		######################################################
 			<head>
 			<style>
 			h1 {
-				font-size:125%;
+				font:14px Helvetica;
+				font-weight: bold;
 				color: white;
 				background-color: #43b61d;
 				text-align: center;
 				-webkit-print-color-adjust: exact;
 			}
 			h2 {
-				font-size:125%;
+				font:12px Helvetica;
+				font-weight: bold;
 				color: #43b61d;
 				text-align: center;
 				-webkit-print-color-adjust: exact;
@@ -2071,12 +2073,13 @@ if ($concept=="RESAS"){ 		######################################################
   				vertical-align: top;
   				text-align: left;
   				padding: 1px;
-  				font:12px Verdana;
+  				font:10px Helvetica;
   				font-weight: bold;
 			}
 			table {
 				table-layout: auto;
 				width: 100%;
+				font-size:80%;
 			}
 			.td_full {
   				border-bottom:0;
@@ -2086,7 +2089,7 @@ if ($concept=="RESAS"){ 		######################################################
   				vertical-align: top;
   				text-align: left;
   				padding: 1px;
-  				font:13px Verdana;
+  				font:10px Helvetica;
   				border-bottom:0.5px solid #d6d6d6;
 			}
 			</style>
