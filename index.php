@@ -337,7 +337,7 @@ class HTML {
 	public function rack_name($id) {
 		if ($id==NULL) {
 			return;
-		}
+		} 
 		$query = "SELECT name ".
 				" FROM `mag_rack`".
 				" WHERE id=".$id;
@@ -347,7 +347,7 @@ class HTML {
 			return ($item[0]==""?"N°".$id:$item[0]);
 		}else{
 			return "N°".$id;
-		}
+		} 
 	}
 	public function class_resa($id) {
 		if ($id==NULL) {
@@ -2106,19 +2106,19 @@ if ($concept=="RESAS"){ 		######################################################
 			<?php
 			# RECUPERATION DES DATA DE FORMULAIRE
 			if ($id>0) {
-				$query = "SELECT date_start,date_stop,mag_contact.name,mag_contact.fonction,mag_contact.mobile,slug,mag_resa.info".
+				$query = "SELECT date_start,date_stop,mag_contact.name,mag_contact.fonction,mag_contact.mobile,slug,mag_resa.info,mag_resa.start_rack_id,mag_resa.stop_rack_id".
 					" FROM mag_resa,mag_contact WHERE mag_contact.id = mag_resa.contact_id AND mag_resa.id=".$id;
 				$result =  $html->query($query);
 				if (mysqli_num_rows($result)>0) {
 					$item = mysqli_fetch_array($result);
 					# START DATE ####################################################################
 					$unixtimestart= intval( strtotime($item[0]) );
-					$date_depart = date('l jS \of F Y',$unixtimestart);
+					$date_depart = strftime("%A %e %b %Y",$unixtimestart);
 					# START HEURE ####################################################################
 					$heure_depart = date('H:i', $unixtimestart);
 					# STOP   DATE ####################################################################
 					$unixtimestop= intval( strtotime($item[1]) );
-					$date_retour = date('l jS \of F Y',$unixtimestop);
+					$date_retour = strftime("%A %e %b %Y",$unixtimestop);
 					# STOP HEURE #####################################################################
 					$heure_retour = date('H:i', $unixtimestop);
 					$nom = $item[2];
@@ -2128,6 +2128,8 @@ if ($concept=="RESAS"){ 		######################################################
 					$info = stripslashes($item[6]);
 					$order   = array("\r\n", "\n", "\r");
 					$info = str_replace($order, "<br />", $info);
+					$rack_start= $html->rack_name($item[7]);
+					$rack_stop=  $html->rack_name($item[8]);
 				}else{
 					$slug="";
 					$info="";
@@ -2138,6 +2140,8 @@ if ($concept=="RESAS"){ 		######################################################
 					$date_retour = "";
 					$heure_depart = "";
 					$date_depart = "";
+					$rack_start="";
+					$rack_stop="";
 				}
 				# PANIER #########################################################
 				$sql = 'SELECT  a.id,
@@ -2154,26 +2158,26 @@ if ($concept=="RESAS"){ 		######################################################
 				$sql.= 'WHERE `mag_model`.`id`=a.`model_id` and
 						`mag_brand`.`id`=`mag_model`.`brand_id` and mag_class.id = a.class_id and ';
 				$sql.=  ' a.id = mag_resa_item.item_id AND mag_resa_item.resa_id='.$id;
-				$sql.= " ORDER BY mag_brand.name,mag_model.reference";
+				$sql.= " ORDER BY `mag_model`.`description`,mag_brand.name,mag_model.reference";
 				$result = $html->query($sql);
 				if (mysqli_num_rows($result)!=0) {
 					$formulaire=   '<h2>Liste du materiel emprunté</h2><table>';
 					# Headers
 					$formulaire.='<tr>
-							<th>Marque</th>
-							<th>Modèle</th>
-							<th>Description</th>
-							<th>Etiquette</th>
-							<!--th>N° Série</th-->
-							<!--th>Ref. Moscou</th-->
-							<!--th>Classe</th-->
-							<th></th>
-							</tr>';
+						<th>Description</th>
+						<th>Marque</th>
+						<th>Modèle</th>
+						<th>Etiquette</th>
+						<!--th>N° Série</th-->
+						<!--th>Ref. Moscou</th-->
+						<!--th>Classe</th-->							
+						<!--th></th-->
+						</tr>';
 					while ($item = mysqli_fetch_array($result)) {
 						$formulaire .= '<tr>'
+						.'<td>'.$item[3].'</td>'
 						.'<td>'.$item[1].'</td>'
 						.'<td>'.$item[2].'</td>'
-						.'<td>'.$item[3].'</td>'
 						.'<td>'.$item[4].'</td>'
 						.'<!--td>'.$item[5].'</td-->'
 						.'<!--td>'.($item[6]==0?"":($item[6]==-1?"":$item[6])).'</td-->'
@@ -2186,16 +2190,18 @@ if ($concept=="RESAS"){ 		######################################################
 			}
 			?>
 			<table>
-			<?php if ($slug!="" or 1) { ?>
-				<tr class="tableau"><td class="tableau">Tournage</td><td  class="tableau" colspan=2><?php echo $slug; ?></td></tr>
+			<tr class="tableau"><td  class="tableau">Nom</td><td  class="tableau" colspan=3><?php echo $nom; ?></td></tr>
+			<tr class="tableau"><td class="tableau">Fonction</td><td  class="tableau" colspan=3><?php echo $fonction; ?></td></tr>
+			<?php if ($telephone!="") { ?>
+				<tr class="tableau"><td class="tableau">Téléphone</td><td  class="tableau" colspan=3><?php echo $telephone; ?></td></tr>
 			<?php } ?>
-			<tr class="tableau"><td  class="tableau">Nom</td><td  class="tableau" colspan=2><?php echo $nom; ?></td></tr>
-			<tr class="tableau"><td class="tableau">Fonction</td><td  class="tableau" colspan=2><?php echo $fonction; ?></td></tr>
-			<tr class="tableau"><td class="tableau">Téléphone</td><td  class="tableau" colspan=2><?php echo $telephone; ?></td></tr>
-			<tr class="tableau"><td class="tableau">Départ</td><td class="tableau"><?php echo $date_depart; ?></td><td><?php echo $heure_depart; ?></td></tr>
-			<tr class="tableau"><td class="tableau">Retour</td><td class="tableau"><?php echo $date_retour; ?></td><td><?php echo $heure_retour; ?></td></tr>
-			<?php if ($info!="" or 1) { ?>
-			<tr class="tableau"><td class="tableau">Informations</td><td  class="tableau" colspan=2><?php echo $info; ?></td></tr>
+			<tr class="tableau"><td class="tableau">Départ</td><td class="tableau"><?php echo $date_depart; ?></td><td><?php echo $heure_depart; ?></td><td><?php echo $rack_start; ?></td></tr>
+			<?php if ($slug!="") { ?>
+				<tr class="tableau"><td class="tableau">Tournage</td><td  class="tableau" colspan=3><?php echo $slug; ?></td></tr>
+			<?php } ?>
+			<tr class="tableau"><td class="tableau">Retour</td><td class="tableau"><?php echo $date_retour; ?></td><td><?php echo $heure_retour; ?></td><td><?php echo $rack_stop; ?></td></tr>
+			<?php if ($info!="") { ?>
+				<tr class="tableau"><td class="tableau">Informations</td><td  class="tableau" colspan=3><?php echo $info; ?></td></tr>
 			<?php } ?>
 			</table>
 			<?php echo $formulaire; ?>
