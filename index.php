@@ -134,6 +134,11 @@ class HTML {
 		}else{
 			$this->menu.='<a href="?concept=CONTACTS" class="menuact">CONTACTS</a> ';
 		}
+		if ($concept<>"HELP") {
+			$this->menu.='<a href="?concept=HELP" class="menubut">AIDE</a> ';
+		}else{
+			$this->menu.='<a href="?concept=HELP" class="menuact">AIDE</a> ';
+		}
 		$this->menu.='</td><td class="menusel">';
 		# LOGIN ET BARCODE
 		$this->menu .= "<FORM method=\"POST\">";
@@ -1983,6 +1988,10 @@ if ($concept=="RESAS"){ 		######################################################
 	}
 	$out.='</table>';
 	$html->body($out);
+	$html->out();
+}elseif ($concept=="HELP") {
+	$html->body="<h2>Codes-barre</h2>";
+	$html->body.='<img src="/barcodegen/html/image.php?code=code128&o=1&t=30&r=2&text='."ADD".'&f=0&a1=B&a2=" alt="BARCODE">';
 	$html->out();
 }elseif ($concept=="RESA_OUT") { ################################################################################	RESA CHECKOUT
 	if ($id>0) {
