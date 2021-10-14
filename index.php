@@ -1989,9 +1989,28 @@ if ($concept=="RESAS"){ 		######################################################
 	$out.='</table>';
 	$html->body($out);
 	$html->out();
-}elseif ($concept=="HELP") {
+}elseif ($concept=="HELP") { ################################################################################	HELP
 	$html->body="<h2>Codes-barre</h2>";
-	$html->body.='<img src="/barcodegen/html/image.php?code=code128&o=1&t=30&r=2&text='."ADD".'&f=0&a1=B&a2=" alt="BARCODE">';
+	$barcodes = [
+		['AJOUTER AU PANIER',   'ADD'			,'Ajoute les éléments suivants au panier'],
+		['ANNULE',    			'CANCEL'		,'Annule l\'opération en cours'],
+		['AUCUN CODE', 			'NULL'			,'Aucun code barre ( en mode LEARN )'],
+		['LOG MATHILDE', 		'USER2'			,'Mathilde Fournier'],
+		['LOG OUT', 			'USER0'			,'Déconnexion utilisateur'],
+		['NOUVEAU CODE BARRE', 	'LEARN'			,'Apprentissage du code barre sur un équipement'],
+		['RETIRER DU PANIER', 	'REMOVE'		,'Supprime les éléments suivants du panier'],
+	];
+	$html->body="<h2>Codes-barre</h2>";
+	$html->body.="<center>\n";
+	foreach ($barcodes as [$titre, $code, $help]) {
+		$html->body.="<br><br><br>\n";
+		$html->body.="<h3>".$titre."</h3>";
+		$html->body.='<img src="/barcodegen/html/image.php?code=code128&o=1&t=30&r=2&text='.$code.'&f=0&a1=B&a2=" alt="'.$code.'"><br>';
+		$html->body.=$help;
+		$html->body.="<br><br><br>\n";
+	}
+	$html->body.="</center>\n";
+	
 	$html->out();
 }elseif ($concept=="RESA_OUT") { ################################################################################	RESA CHECKOUT
 	if ($id>0) {
