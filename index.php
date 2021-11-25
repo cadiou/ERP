@@ -1,6 +1,6 @@
 <?php
 /*
- * 211014 CADIOU.DEV
+ * 211115 CADIOU.DEV
  * RT ERP / index.php
  *
  */
@@ -321,7 +321,7 @@ class HTML {
 				$out.= "<td>".($item['uid']!=-1?$this->user($item['uid']):$item['initials'])."</td>";
 				$out.= "<td>";
 				if ($item[6]<>"") {
-					$out.= "<a href=\"mag_log_image.php?id=".$item[0]."\">".($item['snapshot']?'<img src="mag_image_log.php?id='.$item['id'].'" height="200" align="right">':"")."</a>";
+					$out.= "<a href=\"?concept=IMAGE_LOG&id=".$item[0]."\">".($item['snapshot']?'<img src="image_log.php?id='.$item['id'].'" height="200" align="right">':"")."</a>";
 				}
 				$out.= nl2br(stripslashes($item['body']));
 				$out.= "</td></tr>";
@@ -2027,7 +2027,31 @@ if ($concept=="RESAS"){ 		######################################################
 		$html->body.="<br><br><br>\n";
 	}
 	$html->body.="</center>\n";
-	
+	$html->out();
+}elseif ($concept=="IMAGE_LOG") { ###########################################################################
+	$query = "SELECT `mag_item_log`.id,`mag_item_log`.item_id,`mag_item_log`.datetime,`mag_item_log`.initials,`mag_item_log`.body,`mag_item_log`.level,".
+                                "`mag_item_log`.snapshot,`mag_item_log`.active,`mag_item_log`.uid,".
+                                " `mag_class`.name,`mag_brand`.name,`mag_model`.reference,`mag_inventaire`.tag".
+                                " FROM `mag_item_log`,`mag_class`,`mag_brand`,`mag_model`,`mag_inventaire`".
+                                " WHERE mag_item_log.station_id = ".CONFIG::ID_STATION.
+                                " AND `mag_class`.`id`=`mag_inventaire`.`class_id`".
+                                " AND `mag_brand`.`id`=`mag_model`.`brand_id`".
+                                " AND `mag_model`.`id`=`mag_inventaire`.`model_id`".
+				" AND `mag_item_log`.`item_id`=`mag_inventaire`.`id` ".
+                                " AND `mag_item_log`.`id`=".$id;
+
+	$result = $html->query($query);
+
+	if (mysqli_num_rows($result)!=0) {
+
+        	$item = mysqli_fetch_array($result);
+		$out = '<img src="image_log.php?id='.$item['id'].'" width="100%">';
+
+        	$out.= "<a href=\"?concept=INVENTAIRE&item_id=".$item[1]."\">".$item[12]." ".$item[11]." ".$item[10]." ".$item[9]."</a>";
+        	$html->h2("<b>".$item['datetime']." ".($item['uid']!=-1?$html->user($item['uid']):$item['initials'])."</b>");
+
+		$html->body($out);
+	}
 	$html->out();
 }elseif ($concept=="RESA_OUT") { ################################################################################	RESA CHECKOUT
 	if ($id>0) {
