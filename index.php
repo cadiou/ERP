@@ -1,6 +1,6 @@
 <?php
 /*
- * 211115 CADIOU.DEV
+ * 211202 CADIOU.DEV
  * RT ERP / index.php
  *
  */
@@ -19,7 +19,9 @@ class HTML {
 			CONFIG::DB_PASSWORD,
 			CONFIG::DB_NAME);
 		$this->mysqli->set_charset(CONFIG::DB_CHARSET);
+
 		# COOKIE UID SETTING
+
 		if (isset($_POST["scanner"]) and $_POST["scanner"]=="USER0") {
 			$this->uid = -1;
 			setcookie(CONFIG::COOKIE_UID, null, -1);
@@ -39,7 +41,9 @@ class HTML {
 				$this->uid = -1;
 			}
 		}
+
 		# TERMINAL SETTING
+
 		if (isset($_SERVER['REMOTE_HOST'])) {
 			$this->terminal = $_SERVER['REMOTE_HOST'];
 		}elseif (isset($_SERVER['REMOTE_ADDR'])) {
@@ -47,6 +51,7 @@ class HTML {
 		}else{
 			$this->terminal = "LAZARUS";
 		}
+
 		# HEADER
 
 		if (null !== CONFIG::HTML_HEADER) {
@@ -55,7 +60,7 @@ class HTML {
 			$this->head="";
 		}
 		$this->head.= "<title>".(isset($_GET['concept'])?$_GET['concept']:'ERP').' '.$this->station(CONFIG::ID_STATION)."</title>\n";
-		
+
 		$this->head.=
 		'<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />'."\n".
 		'<link href="style.css" rel="stylesheet" media="all" type="text/css" />'."\n".
@@ -68,11 +73,11 @@ class HTML {
 			'<!--  ERP RT FRANCE  -->'."\n".
 			'<!--  Baptiste CADIOU.DEV  -->'."\n".
 			'<!--  https://github.com/cadiou/  -->'."\n";
-		
+
 		# FOOTER
+
 		$this->foot = "<hr />\n";
 		$this->foot .= $this->group(CONFIG::ID_GROUP)." / ".CONFIG::DB_NAME." / ".gethostname()."\n";
-		
 
 		# MENUBAR
 
@@ -429,7 +434,7 @@ $order_by 	= 	(isset($_GET['order_by'])?$_GET['order_by']:"mag_class.name");
 if (substr($scanner,0,4)=="USER") {
 	$concept="RESAS";
 }elseif (substr($scanner,0,4)=="RESA") {
-	$id = substr($_POST["scanner"],4);	
+	$id = substr($_POST["scanner"],4);
 	$html->redirect="?concept=RESAS&id=".$id;
 }elseif ($scanner=="8001841606958") {
 	$concept="FULLSCREEN";
@@ -457,9 +462,9 @@ if ($concept=="RESAS"){ 		######################################################
 		# UPDATE RESA #######################################################
 		$query = 'UPDATE `mag_resa` SET '
 			."level=".$_POST['mag_phase_id'].","
-            ."user_id=".$html->uid.","
-            ."date_start='".$date_start."',"
-            ."date_stop='".$date_stop."',"
+                        ."user_id=".$html->uid.","
+                        ."date_start='".$date_start."',"
+                        ."date_stop='".$date_stop."',"
 			."slug='".addslashes($slug)."',"
 			."info='".addslashes($info)."',"
 			."contact_id=".($_POST['mag_contact_id']>0?$_POST['mag_contact_id']:"NULL").","
@@ -503,7 +508,7 @@ if ($concept=="RESAS"){ 		######################################################
 			$result =  $html->query($query);
         }
 	}
-	
+
 	if ($id>0) {
 		#####################################################################
 		# LA RESA EXISTE ET NOUS ALLONS LA MODIFIER
@@ -521,44 +526,103 @@ if ($concept=="RESAS"){ 		######################################################
 			$html->body.= "<table width=\"100%\">";
 			$formulaire = '<form enctype="multipart/form-data" method="post">';
 			$formulaire .= '<input type="hidden" name="id" value="'.$id.'">';
-			# START DATE ####################################################################
-			$unixtimestart= intval( strtotime($item[2]) );
-			$formulaire.= '<tr><td>Départ&nbsp;:</td><td>';
-			$formulaire.= '<SELECT NAME="only_date_start" onchange="this.form.submit()">';
-			for ($i = -90; $i <= 90; $i++) {
-				$unixtime=mktime(0, 0, 0, date("m"), date("d")+$i, date("Y"));
-				$formulaire.= '<OPTION VALUE="'.$unixtime.'" '.
-					(
-						(
-							(
-								intval($unixtime)          <= $unixtimestart
-							)
-							and
-							(
-								intval($unixtime)+24*60*60 >  $unixtimestart
-							)
-						) ? " SELECTED":""
-					)
-					.'>'.
-					strftime("%A %e %b %Y", $unixtime).'</OPTION>';
-			}
-			$formulaire .= '</SELECT>';
-			$formulaire .= '</td>';
-			# START HEURE ####################################################################
-			$formulaire .= '<td>';
-			$secondes = intval( substr($item[2],-8,2) )*60*60 + intval( substr($item[2],-5,2) )*60;
-			$formulaire.= '<SELECT NAME="only_time_start" onchange="this.form.submit()">';
-			for ($i = 0; $i < 48; $i++) {
-				$formulaire.= '<OPTION VALUE="'.strval($i*30*60).'" '.($i*60*30==$secondes?" SELECTED":"").'>'.
-					date('H:i', mktime(0, 30*$i, 0, 1, 1, 1)
-					).'</OPTION>';
-			}
-			$formulaire .= '</SELECT>';
-			$formulaire .= '</td>';
-			# RACK ###########################################################################
-			$formulaire .= '<td>';			
-			$formulaire .= $html->rackselect("mag_rack","id" ,"name",$item[8],"start");
-			$formulaire .= '</td></tr>';
+
+                        # START DATE ####################################################################
+                        $unixtimestart= intval( strtotime($item[2]) );
+                        $formulaire.= '<tr><td width="80">Départ&nbsp;:</td><td width="120">';
+                        $formulaire.= '<SELECT NAME="only_date_start" onchange="this.form.submit()">';
+                        for ($i = -90; $i <= 90; $i++) {
+                                $unixtime=mktime(0, 0, 0, date("m"), date("d")+$i, date("Y"));
+                                $formulaire.= '<OPTION VALUE="'.$unixtime.'" '.
+                                        (
+                                                (
+                                                        (
+                                                                intval($unixtime)          <= $unixtimestart
+                                                        )
+                                                        and
+                                                        (
+                                                                intval($unixtime)+24*60*60 >  $unixtimestart
+                                                        )
+                                                ) ? " SELECTED":""
+                                        )
+                                        .'>'.
+                                        strftime("%A %e %b %Y", $unixtime).'</OPTION>';
+                        }
+                        $formulaire .= '</SELECT>';
+                        $formulaire .= '</td>';
+
+                        # START HEURE ####################################################################
+                        $formulaire .= '<td width="80">';
+                        $secondes = intval( substr($item[2],-8,2) )*60*60 + intval( substr($item[2],-5,2) )*60;
+                        $formulaire.= '<SELECT NAME="only_time_start" onchange="this.form.submit()">';
+                        for ($i = 0; $i < 48; $i++) {
+                                $formulaire.= '<OPTION VALUE="'.strval($i*30*60).'" '.($i*60*30==$secondes?" SELECTED":"").'>'.
+                                        date('H:i', mktime(0, 30*$i, 0, 1, 1, 1)
+                                        ).'</OPTION>';
+                        }
+                        $formulaire .= '</SELECT>';
+                        $formulaire .= '</td>';
+
+                        # RACK ###########################################################################
+                        $formulaire .= '<td>';
+                        $formulaire .= $html->rackselect("mag_rack","id" ,"name",$item[8],"start");
+                        $formulaire .= '</td></tr>';
+
+
+                        # TITULAIRE   #####################################################################
+                        $formulaire.= '<tr><td>Titulaire&nbsp;:</td><td colspan="3">';
+                        $formulaire.= $html->menuselect("mag_contact","id" ,"name",$item[4]);
+                        $formulaire.= "</td></tr>";
+
+
+                        # ETAPE ##########################################################################
+                        $formulaire.= '<tr><td>Étape&nbsp;:</td><td colspan="3" class="level';
+                        if ($item[1]==0) {
+                                $formulaire.= "0";
+                        }elseif ($item[1]==1) {
+                                $formulaire.= "0";
+                        }elseif ($item[1]==2) {
+                                $formulaire.= "1";
+                        }elseif ($item[1]==3) {
+                                $formulaire.= "3";
+                        }elseif ($item[1]==4) {
+                                $formulaire.= "4";
+                        }elseif ($item[1]==5) {
+                                $formulaire.= "2";
+                        }elseif ($item[1]==6) {
+                                $formulaire.= "5";
+                        }
+                        $formulaire.= "\">";
+                        $formulaire.='<SELECT NAME="mag_phase_id" onchange="this.form.submit()">';
+                        if ($level<=2) {
+                                $formulaire.='<OPTION VALUE="1" '.($level==1?"SELECTED":"").'>1-Prévisionnelle</OPTION>';
+                                $formulaire.='<OPTION VALUE="2" '.($level==2?"SELECTED":"").'>2-Confirmée - À préparer</OPTION>';
+                        }
+                        if ($level>=2 and $level<=3) {
+                                $formulaire.='<OPTION VALUE="3" '.($level==3?"SELECTED":"").'>3-Armoire départ</OPTION>';
+                        }
+                        if ($level>=3 and $level<=4) {
+                                $formulaire.='<OPTION VALUE="4" '.($level==4?"SELECTED":"").'>4-En cours</OPTION>';
+                        }
+                        if ($level>=4 and $level<=5) {
+                                $formulaire.='<OPTION VALUE="5" '.($level==5?"SELECTED":"").'>5-Armoire retour</OPTION>';
+                        }
+                        if ($level>=6 and $level<=6) {
+                                $formulaire.='<OPTION VALUE="6" '.($level==6?"SELECTED":"").'>6-Vérifiée</OPTION></SELECT>';
+                        }
+                        $formulaire.= "</td></tr>";
+
+                        # TOURNAGE #######################################################################
+                        $formulaire.= '<tr><td>Tournage&nbsp;:</td><td colspan="3">';
+                        $formulaire.= '<input SIZE="80" TYPE="text" NAME="slug" VALUE="'.$item[7].'" ></td>';
+                        $formulaire.= "</tr>";
+
+                        # INFO        #####################################################################
+
+                        $formulaire.= '<tr height="120"><td>Info&nbsp;:<p><!--input class="bouton_in" type="submit" /--></td><td colspan="3">';
+                        $formulaire.= '<textarea rows = "8" cols = "74" name = "info">'.$item[6].'</textarea>';
+                        $formulaire.= "</td></tr>";
+
 			# STOP   DATE ####################################################################
 			$formulaire.= "<tr><td>Retour&nbsp;:</td><td>";
 			$formulaire.= '<SELECT NAME="only_date_stop" onchange="this.form.submit()">';
@@ -583,7 +647,9 @@ if ($concept=="RESAS"){ 		######################################################
 			}
 			$formulaire .= '</SELECT>';
 			$formulaire .= '</td>';
+
 			# STOP   HEURE ####################################################################
+
 			$formulaire .= '<td>';
 			$secondes = intval( substr($item[3],-8,2) )*60*60 + intval( substr($item[3],-5,2) )*60;
 			$formulaire.= '<SELECT NAME="only_time_stop" onchange="this.form.submit()">';
@@ -594,67 +660,23 @@ if ($concept=="RESAS"){ 		######################################################
 			}
 			$formulaire .= '</SELECT>';
 			$formulaire .= '</td>';
+
 			# RACK ###########################################################################
+
 			$formulaire .= '<td>';
 			$formulaire .= $html->rackselect("mag_rack","id" ,"name",$item[9],"stop");
 			$formulaire .= '</td></tr>';
-			# TITULAIRE   #####################################################################
-			$formulaire.= '<tr><td>Titulaire&nbsp;:</td><td colspan="3">';
-			$formulaire.= $html->menuselect("mag_contact","id" ,"name",$item[4]);
-			$formulaire.= "</td></tr>";
-			# ETAPE ##########################################################################
-			$formulaire.= '<tr><td>Étape&nbsp;:</td><td colspan="3" class="level';
-			if ($item[1]==0) {
-				$formulaire.= "0";
-			}elseif ($item[1]==1) {
-				$formulaire.= "0";
-			}elseif ($item[1]==2) {
-				$formulaire.= "1";
-			}elseif ($item[1]==3) {
-				$formulaire.= "3";
-			}elseif ($item[1]==4) {
-				$formulaire.= "4";
-			}elseif ($item[1]==5) {
-				$formulaire.= "2";
-			}elseif ($item[1]==6) {
-				$formulaire.= "5";
-			}
-			$formulaire.= "\">";
-		#	$formulaire.= $html->menuswitch("mag_phase","id" ,"name",$item[1]);
-			$formulaire.='<SELECT NAME="mag_phase_id" onchange="this.form.submit()">';
-		#	$formulaire.='<OPTION VALUE="1" >RESET</OPTION>';
-			if ($level<=2) {
-				$formulaire.='<OPTION VALUE="1" '.($level==1?"SELECTED":"").'>1-Prévisionnelle</OPTION>';
-				$formulaire.='<OPTION VALUE="2" '.($level==2?"SELECTED":"").'>2-Confirmée - À préparer</OPTION>';
-			}
-			if ($level>=2 and $level<=3) {
-				$formulaire.='<OPTION VALUE="3" '.($level==3?"SELECTED":"").'>3-Armoire départ</OPTION>';
-			}
-			if ($level>=3 and $level<=4) {
-				$formulaire.='<OPTION VALUE="4" '.($level==4?"SELECTED":"").'>4-En cours</OPTION>';
-			}
-			if ($level>=4 and $level<=5) {
-				$formulaire.='<OPTION VALUE="5" '.($level==5?"SELECTED":"").'>5-Armoire retour</OPTION>';
-			}
-			if ($level>=6 and $level<=6) {
-				$formulaire.='<OPTION VALUE="6" '.($level==6?"SELECTED":"").'>6-Vérifiée</OPTION></SELECT>';
-			}
-			$formulaire.= "</td></tr>";
-			# TOURNAGE #######################################################################
-			$formulaire.= '<tr><td>Tournage&nbsp;:</td><td colspan="3">';
-			$formulaire.= '<input SIZE="80" TYPE="text" NAME="slug" VALUE="'.$item[7].'" ></td>';
-			$formulaire.= "</tr>";
+
 			# INFO        #####################################################################
-			$formulaire.= '<tr height="120"><td>Info&nbsp;:<p><!--input class="bouton_in" type="submit" /--></td><td colspan="3">';
-			$formulaire.= '<textarea rows = "8" cols = "74" name = "info">'.$item[6].'</textarea><br>'
-				.'<input type="submit" class="bouton_in" value="Envoyer">';
+
+			$formulaire.= '<tr><td></td><td colspan="3">';
+			$formulaire.= '<input type="submit" class="bouton_in" value="Enregistrer">';
 			$formulaire.= "</td></tr>";
-			# CLASSE      #####################################################################
+
 			$formulaire.= "</table><h1>Mat&eacute;riel</h1>";
-		
-			
+
 			############## SCANNER IN OUT
-			
+
 			if (isset($_POST['scanner'])) {
 				if ($_POST['scanner']=="ADD") {
 					if ($html->uid>0 and $level<=3) {
@@ -675,37 +697,7 @@ if ($concept=="RESAS"){ 		######################################################
 					$result =  $html->query($query);
 					$html->redirect="?concept=RESAS&id=".$id;
 				}else{
-					if ($list=="LEARN") {
-						if (intval($_POST['scanner'])) {
-							$query_bar = "UPDATE mag_inventaire SET mag_inventaire.barcode='".$_POST['scanner']."' WHERE mag_inventaire.id=".$id;
-							$result_bar =  $html->query($query_bar);
-							$query_log = "INSERT INTO `mag_item_log` SET "
-								."active=1, "
-								."item_id="                     .$id.", "
-								."level=2, "
-								."initials='".($html->uid>0?$html->initials($html->uid):$initials). "', "
-								."uid='".$html->uid. "', "
-								."ip='".$html->terminal. "', "
-								."station_id='".CONFIG::ID_STATION. "', "
-								."body='". addslashes("Nouveau code-barre : ".$_POST['scanner'])."'" ;
-							$result_log =  $html->query($query_log);
-							$html->redirect="?concept=INVENTAIRE&list=ITEM&item_id=".$id;
-						}elseif ($_POST['scanner'] == "NULL"){
-							$query_bar = "UPDATE mag_inventaire SET mag_inventaire.barcode=NULL WHERE mag_inventaire.id=".$id;
-							$result_bar =  $html->query($query_bar);
-							$query_log = "INSERT INTO `mag_item_log` SET "
-								."active=1, "
-								."item_id="                     .$id.", "
-								."level=2, "
-								."initials='".($html->uid>0?$html->initials($html->uid):$initials). "', "
-								."uid='".$html->uid. "', "
-								."ip='".$html->terminal. "', "
-								."station_id='".CONFIG::ID_STATION. "', "
-								."body='". addslashes("Effacement du code-barre")."'" ;
-							$result_log =  $html->query($query_log);
-							$html->redirect="?concept=INVENTAIRE&list=ITEM&item_id=".$id;
-						}
-					}elseif ($list=="ADD") {
+					if ($list=="ADD") {
 						$query_bar = "SELECT id FROM mag_inventaire WHERE barcode ='".$_POST['scanner']."'";
 						$result_bar =  $html->query($query_bar);
 						if (mysqli_num_rows($result_bar)!=0) {
@@ -730,7 +722,7 @@ if ($concept=="RESAS"){ 		######################################################
 						}else{
 							$html->info = "Objet absent de la base";
 						}
-					}elseif ($level ==5){
+					}elseif ($level == 5){
 						$query_bar = "SELECT id FROM mag_inventaire WHERE barcode ='".$_POST['scanner']."'";
 						$result_bar =  $html->query($query_bar);
 						if (mysqli_num_rows($result_bar)!=0) {
@@ -755,7 +747,7 @@ if ($concept=="RESAS"){ 		######################################################
 			if ($list<>"ADD" and $list<>"REMOVE") {
 				# $formulaire.= $html->menuselect("mag_class","id" ,"name",$classe);
 				# LISTE DU MATERIEL DE LA CLASSE DISPONIBLE
-				if ($classe > 0) {				
+				if ($classe > 0) {
 					$sql = 'SELECT  a.id,
 						`mag_brand`.`name`,
 						`mag_model`.`reference`,
@@ -801,21 +793,21 @@ if ($concept=="RESAS"){ 		######################################################
 					}else{
 						$formulaire.= " Cettre classe ne contient pas d'objet disponible.";
 					}
-				}	
+				}
 			}
 
 			# INDICATION DU BARCODE
 
 			if ($list=="ADD") {
-				$formulaire.= '<img src="https://webviewersolutions.com/images/barcodescanning.gif"><span class="bouton_in">SCANNEZ POUR AJOUTER</span>';
+				$formulaire.= '<img src="barcodescanning.gif"><span class="bouton_in">SCANNEZ POUR AJOUTER</span>';
 			}elseif ($list=="REMOVE") {
-				$formulaire.= '<img src="https://webviewersolutions.com/images/barcodescanning.gif"><span class="bouton_out">SCANNEZ POUR RETIRER</span>';
+				$formulaire.= '<img src="barcodescanning.gif"><span class="bouton_out">SCANNEZ POUR RETIRER</span>';
 			}elseif ($level==5) {
-				$formulaire.= '<img src="https://webviewersolutions.com/images/barcodescanning.gif"><span class="bouton_in">SCANNEZ POUR VERIFIER</span>';
+				$formulaire.= '<img src="barcodescanning.gif"><span class="bouton_in">SCANNEZ POUR VERIFIER</span>';
 			}
-			
-			
+
 			# PANIER #########################################################
+
 			$sql = 'SELECT  a.id,
 					`mag_brand`.`name`,
 					`mag_model`.`reference`,
@@ -831,7 +823,6 @@ if ($concept=="RESAS"){ 		######################################################
 			$sql.= 'WHERE `mag_model`.`id`=a.`model_id` and
 					`mag_brand`.`id`=`mag_model`.`brand_id` and mag_class.id = a.class_id and ';
 
-			#        $sql.= 'NOT EXISTS (SELECT * from mag_resa_item AS b WHERE a.id = b.item_id and b.resa_id = '.$id.') AND ';
 			$sql.=  ' a.id = mag_resa_item.item_id AND mag_resa_item.resa_id='.$id;
 			$sql.= " ORDER BY mag_resa_item.timestamp DESC,mag_brand.name,mag_model.reference";
 			$result = $html->query($sql);
@@ -877,8 +868,7 @@ if ($concept=="RESAS"){ 		######################################################
 					$html->redirect="?concept=RESAS&list=ADD&id=".$id;
 				}
 			}
-			
-			
+
 			# FIN DU FORMULAIRE ##############################################
 
 			$formulaire .= '</form>';
@@ -886,6 +876,44 @@ if ($concept=="RESAS"){ 		######################################################
 		}
 		$html->body.= "";
 	} else {
+
+                # LA RESA N'EXISTE PAS DONC ON PREPARE UN FORMULAIRE
+
+                $html->body.= "<table width=\"100%\">";
+
+                if ($html->uid==-1) {
+                        $html->body.="<tr><td class=\"level1\">Pour créer une réservation il faut être identifié. Merci.</td></tr>";
+                }else{
+                        $html->body.= "<h1>Nouvelle réservation</h1>";
+                        $html->body.= '<form enctype="multipart/form-data" method="post">';
+
+                        # NEW
+                        $html->body.= '<input type="hidden" name="new" value="new">';
+
+                        # DATE ET HEURE START ##################################################################
+                        $html->body.= "<tr><td>Départ&nbsp;:</td><td>";
+                        $html->body.= '<SELECT NAME="only_date_start" onchange="this.form.submit()">';
+
+                        for ($i = 0; $i <= 90; $i++) {
+                                $html->body.= '<OPTION VALUE="'.
+                                        mktime(0, 0, 0, date("m"), date("d")+$i, date("Y")).
+                                                '" '.($i==0?" SELECTED":"").'>'.
+                                        strftime("%A %e %b %Y", mktime(0, 0, 0, date("m"), date("d")+$i, date("Y"))).'</OPTION>';
+                        }
+                        $html->body .= '</SELECT>';
+                        $html->body .= '<SELECT NAME="only_time_start" onchange="this.form.submit()">';
+                        for ($i = 0; $i <= 48; $i++) {
+                          $html->body .= '<OPTION VALUE="'.strval($i*30*60).'" '.($i==13?" SELECTED":"").'>'.
+                            date('H:i',mktime(0, 30*$i, 0, 1, 1, 1)).
+                            '</OPTION>';
+                        }
+                        $html->body .= '</SELECT>';
+                        $html->body .= '</form>';
+                        $html->body .= '</td></tr>';
+                }
+
+		$html->body .= '</table>';
+
 		$out="<h1>R&eacute;servations</h1>";
 		#### LISTE DES RESERVATIONS ##################################################################
 		$out.="<table>";
@@ -952,41 +980,7 @@ if ($concept=="RESAS"){ 		######################################################
 		}
 		$out.='</table>';
 		$html->body($out);
-		# LA RESA N'EXISTE PAS DONC ON PREPARE UN FORMULAIRE
-		$html->body.= "<table width=\"100%\">";
-		if ($html->uid==-1) {
-			$html->body.="<tr><td class=\"level1\">Pour créer une réservation il faut être identifié. Merci.</td></tr>";
-		}else{
-			$html->body.= "<h1>Nouvelle réservation</h1>";
-			$formulaire = '<form enctype="multipart/form-data" method="post">';
 
-			# NEW
-			$formulaire .= '<input type="hidden" name="new" value="new">';
-
-			# DATE ET HEURE START ##################################################################
-			$formulaire.= "<tr><td>Départ&nbsp;:</td><td>";
-			$formulaire.= '<SELECT NAME="only_date_start" onchange="this.form.submit()">';
-
-			for ($i = 0; $i <= 90; $i++) {
-				$formulaire.= '<OPTION VALUE="'.
-					mktime(0, 0, 0, date("m"), date("d")+$i, date("Y")).
-						'" '.($i==0?" SELECTED":"").'>'.
-					strftime("%A %e %b %Y", mktime(0, 0, 0, date("m"), date("d")+$i, date("Y"))).'</OPTION>';
-			}
-            $formulaire .= '</SELECT>';
-            $formulaire.= '<SELECT NAME="only_time_start" onchange="this.form.submit()">';
-            for ($i = 0; $i <= 48; $i++) {
-                $formulaire.= '<OPTION VALUE="'.strval($i*30*60).'" '.($i==13?" SELECTED":"").'>'.
-                    date('H:i',mktime(0, 30*$i, 0, 1, 1, 1)).
-					'</OPTION>';
-            }
-            $formulaire .= '</SELECT>';
-			$formulaire .= '</form>';
-			$formulaire .= '</td></tr>';
-			$html->body.= $formulaire;
-		}
-
-		$html->body.= "</table>";
 	}
 	$html->out();
 }elseif ($concept=="PLANNING"){ #################################################################################	PLANNING
@@ -1020,16 +1014,16 @@ if ($concept=="RESAS"){ 		######################################################
 	    date("W",strtotime($year."W".$week."7+".($n+1)."week")).
 	    '">&rarr;</a></td>';
 	$table.= '</tr>';
-	
+
 	# JOURS DE LA SEMAINE
-	$table.='<tr><td width="'.(100/($y+1)).'%"></td>';	
+	$table.='<tr><td width="'.(100/($y+1)).'%"></td>';
 	for ($i = 0; $i <$y ; $i++) {
 		$table.= '<td width="'.(100/($y+1)).'%"';
 		$table.= ">".strftime("%A", ($i+4)*24*3600);
 		$table.= "</td>";
 	}
 	$table.="</tr>";
-	
+
 	for ($i = 0; $i <= $n; $i++) {
 		if ($page=="compact" or $page=="print") {
 			# CLASSES DE LA SEMAINE
@@ -1339,7 +1333,7 @@ if ($concept=="RESAS"){ 		######################################################
 			if ($item[22]!="") {
 				$html->body.= '<tr><td>Cat&eacute;gorie&nbsp;:</td><td><a href="?concept=INVENTAIRE&list=ITEM&category_id='.$item['category_id'].'">'.$item[22].'</a></td></tr>';
 			}
-			
+
 			# DESCRIPTION
 			$html->body.= '<tr><td>Description&nbsp;:</td><td>'.	$item[10].'</td></tr>';
 
@@ -1371,13 +1365,13 @@ if ($concept=="RESAS"){ 		######################################################
 			if (($item[23]<>NULL)or($list=="LEARN")) {
 				$html->body.= '<tr><td>Code-Barre&nbsp;:</td><td>';
 				if ($list=="ITEM") {
-					$html->body.= $item[23];
+					$html->body.= '<img src="/barcodegen/html/image.php?code=code128&o=1&t=30&r=2&text='.$item[23].'&f=0&a1=B&a2=" alt="'.$item[23].'">';
 				}elseif ($list=="LEARN"){
 					$html->body.= '<img src="barcodescanning.gif">';
 				}
 				$html->body.= '</td></tr>';
 			}
-			# SIM			
+			# SIM
 			$query_sim = "SELECT * FROM mag_sim"
 				." WHERE mag_sim.device_id = ".$id
 				." ORDER BY slot";
@@ -1906,19 +1900,19 @@ if ($concept=="RESAS"){ 		######################################################
 				`mag_sim`.`device_id`=`mag_inventaire`.`id` and
 				`mag_area`.`id`=`mag_inventaire`.`area_id`';
 		$sql.= ' UNION ALL  SELECT 	`mag_sim`.id,
-			NULL,	
-			NULL,	
-			NULL,
-			NULL,        
 			NULL,
 			NULL,
-			NULL,	
-			NULL ,		
-			`mag_sim`.`operator`,		
-			`mag_sim`.`nsce`,		
-			`mag_sim`.`info`,		
-			`mag_sim`.`slot`,		
-			`mag_sim`.`msisdn`,		
+			NULL,
+			NULL,
+			NULL,
+			NULL,
+			NULL,
+			NULL ,
+			`mag_sim`.`operator`,
+			`mag_sim`.`nsce`,
+			`mag_sim`.`info`,
+			`mag_sim`.`slot`,
+			`mag_sim`.`msisdn`,
 			NULL,
 			`mag_sim`.`valid`,
 			NULL,
@@ -2211,7 +2205,7 @@ if ($concept=="RESAS"){ 		######################################################
 						<th>Etiquette</th>
 						<!--th>N° Série</th-->
 						<!--th>Ref. Moscou</th-->
-						<!--th>Classe</th-->							
+						<!--th>Classe</th-->
 						<!--th></th-->
 						</tr>';
 					while ($item = mysqli_fetch_array($result)) {
@@ -2261,7 +2255,7 @@ if ($concept=="RESAS"){ 		######################################################
 		$formulaire="Il manque l'ID de la resa";
 	}
 }elseif ($concept=="EXPORT_CSV") {
-	
+
 	# Selections
 	$sql = 'SELECT * FROM `mag_inventaire`,`mag_status`,`mag_model`,`mag_class`,`mag_brand`,`mag_area`';
 	$sql.= 'WHERE `mag_status`.`id`=`mag_inventaire`.`status_id` and
