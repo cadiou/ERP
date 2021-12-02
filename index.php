@@ -371,9 +371,9 @@ class HTML {
 		}
 		$query = "SELECT mag_class.name ".
 				" FROM mag_resa_item,mag_inventaire,mag_class".
-				" WHERE mag_class.planning = 1 and mag_resa_item.item_id = mag_inventaire.id and".
+				" WHERE mag_class.planning > 0 and mag_resa_item.item_id = mag_inventaire.id and".
 				" mag_inventaire.class_id = mag_class.id and mag_resa_item.resa_id=".$id.
-				" GROUP BY mag_class.name";
+				" GROUP BY mag_class.name,mag_class.planning ORDER BY mag_class.planning";
 		$text="";
 		$result = $this->query($query);
 		if (mysqli_num_rows($result)>0) {
