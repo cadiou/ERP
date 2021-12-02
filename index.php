@@ -915,7 +915,9 @@ if ($concept=="RESAS"){ 		######################################################
 		$html->body .= '</table>';
 
 		$out="<h1>R&eacute;servations</h1>";
+
 		#### LISTE DES RESERVATIONS ##################################################################
+
 		$out.="<table>";
 		# Headers
 		$out.='	<th colspan="2"><a href="?concept=RESAS&'.($page<>""?"page=".$page."&":"").'order_by=mag_resa.date_start">D&eacute;part</a></th>
@@ -940,7 +942,7 @@ if ($concept=="RESAS"){ 		######################################################
 		$sql.= ' WHERE mag_resa.level = mag_phase.id and mag_resa.level<>6 ';
 		# CLAUSE ORDER BY
 		if ($order_by == "mag_resa.date_start" or $order_by == "") {
-			$sql.= " ORDER BY mag_resa.date_start ASC,mag_resa.date_stop ASC";
+			$sql.= " ORDER BY mag_resa.date_start DESC,mag_resa.date_stop DESC";
 		}elseif ($order_by == "mag_resa.date_stop") {
 			$sql.= " ORDER BY mag_resa.date_stop";
 		}elseif ($order_by == "mag_resa.slug") {
