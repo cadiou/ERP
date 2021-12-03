@@ -1,6 +1,6 @@
 <?php
 /*
- * 211202 CADIOU.DEV
+ * 211203 CADIOU.DEV
  * RT ERP / index.php
  *
  */
@@ -365,6 +365,23 @@ class HTML {
 			return "N°".$id;
 		} 
 	}
+	
+	public function class_name($id) {
+		if ($id==NULL) {
+			return;
+		} 
+		$query = "SELECT name ".
+				" FROM `mag_class`".
+				" WHERE id=".$id;
+		$result = $this->query($query);
+		if (mysqli_num_rows($result)>0) {
+			$item = mysqli_fetch_array($result);
+			return ($item[0]==""?"Classe N°".$id:$item[0]);
+		}else{
+			return "Classe N°".$id;
+		} 
+	}
+	
 	public function class_resa($id) {
 		if ($id==NULL) {
 			return;
@@ -421,6 +438,8 @@ $model_id=		(isset($_POST['model_id'])?			$_POST['model_id']:			(isset($_GET['mo
 $area_id=		(isset($_POST['area_id'])?			$_POST['area_id']:			(isset($_GET['area_id'])?			$_GET['area_id']:			-1	));
 $start_rack_id=	(isset($_POST['start_mag_rack_id'])?$_POST['start_mag_rack_id']:(isset($_GET['start_mag_rack_id'])?	$_GET['start_mag_rack_id']:	0	));
 $stop_rack_id=	(isset($_POST['stop_mag_rack_id'])?	$_POST['stop_mag_rack_id']:	(isset($_GET['stop_mag_rack_id'])?	$_GET['stop_mag_rack_id']:	0	));
+$kit1=			(isset($_POST['kit1'])?				$_POST['kit1']:				-1);
+$kit2=			(isset($_POST['kit2'])?				$_POST['kit2']:				-1);
 $date_start=	(isset($_POST['only_time_start'])?	date('Y-m-d H:i:s',intval($_POST['only_time_start'])+intval($_POST['only_date_start'])):	"2021-02-02 12:00:00");
 $date_stop=		(isset($_POST['only_time_stop'])?	date('Y-m-d H:i:s',intval($_POST['only_time_stop'])+intval($_POST['only_date_stop'])):		"");
 $classe 	= 	(isset($_POST['mag_class_id'])?		$_POST['mag_class_id']:	-1);
@@ -469,7 +488,9 @@ if ($concept=="RESAS"){ 		######################################################
 			."info='".addslashes($info)."',"
 			."contact_id=".($_POST['mag_contact_id']>0?$_POST['mag_contact_id']:"NULL").","
 			."start_rack_id=".($start_rack_id==-1?"NULL":$start_rack_id).","
-			."stop_rack_id=".($stop_rack_id==-1?"NULL":$stop_rack_id)
+			."stop_rack_id=".($stop_rack_id==-1?"NULL":$stop_rack_id).","
+			."kit1=".($kit1==-1?"NULL":$kit1).","
+			."kit2=".($kit2==-1?"NULL":$kit2)
 			." WHERE id=".$id;
         $result =  $html->query($query);
 		# REM FROM RESA ####################################################
@@ -512,7 +533,7 @@ if ($concept=="RESAS"){ 		######################################################
 	if ($id>0) {
 		#####################################################################
 		# LA RESA EXISTE ET NOUS ALLONS LA MODIFIER
-		$query = "SELECT id,level,date_start,date_stop,contact_id,user_id,info,slug,start_rack_id,stop_rack_id FROM mag_resa WHERE id=".$id;
+		$query = "SELECT id,level,date_start,date_stop,contact_id,user_id,info,slug,start_rack_id,stop_rack_id,kit1,kit2 FROM mag_resa WHERE id=".$id;
 		$result =  $html->query($query);
 		$item = mysqli_fetch_array($result);
 		$level=$item[1];
@@ -527,13 +548,13 @@ if ($concept=="RESAS"){ 		######################################################
 			$formulaire = '<form enctype="multipart/form-data" method="post">';
 			$formulaire .= '<input type="hidden" name="id" value="'.$id.'">';
 
-                        # START DATE ####################################################################
-                        $unixtimestart= intval( strtotime($item[2]) );
-                        $formulaire.= '<tr><td width="80">Départ&nbsp;:</td><td width="120">';
-                        $formulaire.= '<SELECT NAME="only_date_start" onchange="this.form.submit()">';
-                        for ($i = -90; $i <= 90; $i++) {
-                                $unixtime=mktime(0, 0, 0, date("m"), date("d")+$i, date("Y"));
-                                $formulaire.= '<OPTION VALUE="'.$unixtime.'" '.
+            # START DATE ####################################################################
+            $unixtimestart= intval( strtotime($item[2]) );
+            $formulaire.= '<tr><td width="120">Départ&nbsp;:</td><td width="120">';
+            $formulaire.= '<SELECT NAME="only_date_start" onchange="this.form.submit()">';
+            for ($i = -90; $i <= 90; $i++) {
+            	$unixtime=mktime(0, 0, 0, date("m"), date("d")+$i, date("Y"));
+                $formulaire.= '<OPTION VALUE="'.$unixtime.'" '.
                                         (
                                                 (
                                                         (
@@ -547,83 +568,137 @@ if ($concept=="RESAS"){ 		######################################################
                                         )
                                         .'>'.
                                         strftime("%A %e %b %Y", $unixtime).'</OPTION>';
-                        }
-                        $formulaire .= '</SELECT>';
-                        $formulaire .= '</td>';
+            }
+            $formulaire .= '</SELECT>';
+            $formulaire .= '</td>';
 
-                        # START HEURE ####################################################################
-                        $formulaire .= '<td width="80">';
-                        $secondes = intval( substr($item[2],-8,2) )*60*60 + intval( substr($item[2],-5,2) )*60;
-                        $formulaire.= '<SELECT NAME="only_time_start" onchange="this.form.submit()">';
-                        for ($i = 0; $i < 48; $i++) {
+            # START HEURE ####################################################################
+            $formulaire .= '<td width="80">';
+            $secondes = intval( substr($item[2],-8,2) )*60*60 + intval( substr($item[2],-5,2) )*60;
+            $formulaire.= '<SELECT NAME="only_time_start" onchange="this.form.submit()">';
+            for ($i = 0; $i < 48; $i++) {
                                 $formulaire.= '<OPTION VALUE="'.strval($i*30*60).'" '.($i*60*30==$secondes?" SELECTED":"").'>'.
                                         date('H:i', mktime(0, 30*$i, 0, 1, 1, 1)
                                         ).'</OPTION>';
-                        }
-                        $formulaire .= '</SELECT>';
-                        $formulaire .= '</td>';
+            }
+            $formulaire .= '</SELECT>';
+            $formulaire .= '</td>';
 
-                        # RACK ###########################################################################
-                        $formulaire .= '<td>';
-                        $formulaire .= $html->rackselect("mag_rack","id" ,"name",$item[8],"start");
-                        $formulaire .= '</td></tr>';
-
-
-                        # TITULAIRE   #####################################################################
-                        $formulaire.= '<tr><td>Titulaire&nbsp;:</td><td colspan="3">';
-                        $formulaire.= $html->menuselect("mag_contact","id" ,"name",$item[4]);
-                        $formulaire.= "</td></tr>";
+            # RACK ###########################################################################
+            $formulaire .= '<td>';
+            $formulaire .= $html->rackselect("mag_rack","id" ,"name",$item[8],"start");
+            $formulaire .= '</td></tr>';
 
 
-                        # ETAPE ##########################################################################
-                        $formulaire.= '<tr><td>Étape&nbsp;:</td><td colspan="3" class="level';
-                        if ($item[1]==0) {
+            # TITULAIRE   #####################################################################
+            $formulaire.= '<tr><td>Titulaire&nbsp;:</td><td colspan="3">';
+            $formulaire.= $html->menuselect("mag_contact","id" ,"name",$item[4]);
+            $formulaire.= "</td></tr>";
+
+
+            # ETAPE ##########################################################################
+
+            $formulaire.= '<tr><td>Étape&nbsp;:</td><td colspan="3" class="level';
+            if ($item[1]==0) {
                                 $formulaire.= "0";
-                        }elseif ($item[1]==1) {
+            }elseif ($item[1]==1) {
                                 $formulaire.= "0";
-                        }elseif ($item[1]==2) {
+            }elseif ($item[1]==2) {
                                 $formulaire.= "1";
-                        }elseif ($item[1]==3) {
+            }elseif ($item[1]==3) {
                                 $formulaire.= "3";
-                        }elseif ($item[1]==4) {
+            }elseif ($item[1]==4) {
                                 $formulaire.= "4";
-                        }elseif ($item[1]==5) {
+            }elseif ($item[1]==5) {
                                 $formulaire.= "2";
-                        }elseif ($item[1]==6) {
+            }elseif ($item[1]==6) {
                                 $formulaire.= "5";
-                        }
-                        $formulaire.= "\">";
-                        $formulaire.='<SELECT NAME="mag_phase_id" onchange="this.form.submit()">';
-                        if ($level<=2) {
-                                $formulaire.='<OPTION VALUE="1" '.($level==1?"SELECTED":"").'>1-Prévisionnelle</OPTION>';
-                                $formulaire.='<OPTION VALUE="2" '.($level==2?"SELECTED":"").'>2-Confirmée - À préparer</OPTION>';
-                        }
-                        if ($level>=2 and $level<=3) {
-                                $formulaire.='<OPTION VALUE="3" '.($level==3?"SELECTED":"").'>3-Armoire départ</OPTION>';
-                        }
-                        if ($level>=3 and $level<=4) {
-                                $formulaire.='<OPTION VALUE="4" '.($level==4?"SELECTED":"").'>4-En cours</OPTION>';
-                        }
-                        if ($level>=4 and $level<=5) {
-                                $formulaire.='<OPTION VALUE="5" '.($level==5?"SELECTED":"").'>5-Armoire retour</OPTION>';
-                        }
-                        if ($level>=6 and $level<=6) {
-                                $formulaire.='<OPTION VALUE="6" '.($level==6?"SELECTED":"").'>6-Vérifiée</OPTION></SELECT>';
-                        }
-                        $formulaire.= "</td></tr>";
+            }
+            $formulaire.= "\">";
+            $formulaire.='<SELECT NAME="mag_phase_id" onchange="this.form.submit()">';
+            if ($level<=2) {
+                $formulaire.='<OPTION VALUE="1" '.($level==1?"SELECTED":"").'>1-Prévisionnelle</OPTION>';
+    	        $formulaire.='<OPTION VALUE="2" '.($level==2?"SELECTED":"").'>2-Confirmée - À préparer</OPTION>';
+			}
+    		if ($level>=2 and $level<=3) {
+            	$formulaire.='<OPTION VALUE="3" '.($level==3?"SELECTED":"").'>3-Armoire départ</OPTION>';
+            }
+            if ($level>=3 and $level<=4) {
+                $formulaire.='<OPTION VALUE="4" '.($level==4?"SELECTED":"").'>4-En cours</OPTION>';
+            }
+            if ($level>=4 and $level<=5) {
+                $formulaire.='<OPTION VALUE="5" '.($level==5?"SELECTED":"").'>5-Armoire retour</OPTION>';
+            }
+            if ($level>=6 and $level<=6) {
+                $formulaire.='<OPTION VALUE="6" '.($level==6?"SELECTED":"").'>6-Vérifiée</OPTION></SELECT>';
+            }
+            $formulaire.= "</td></tr>";
 
-                        # TOURNAGE #######################################################################
-                        $formulaire.= '<tr><td>Tournage&nbsp;:</td><td colspan="3">';
-                        $formulaire.= '<input SIZE="80" TYPE="text" NAME="slug" VALUE="'.$item[7].'" ></td>';
-                        $formulaire.= "</tr>";
+			# KIT PREVU ##################################################################
+			
+			if ($item[1]==1) {
+				$formulaire .= '<tr><td>Pronostic&nbsp;:</td><td colspan="3">';
+				
+				# kit 1
+				
+				$sql = "select `id`,`name` from `mag_class` where `planning` = 1 and station_id = ".CONFIG::ID_STATION." order by `name` asc";
+				$result1 = $html->query($sql);
+				$formulaire .= '<SELECT NAME="kit1" onchange="this.form.submit()">';
+       			$formulaire .= '<OPTION VALUE="-1">N/A</A>';
+				while ($item1 = mysqli_fetch_array($result1)) {
+					$formulaire .= '<OPTION VALUE="'.$item1[0].'"';
+					if ($item[10] == $item1[0]) {
+						$formulaire .= " SELECTED";
+					}
+					$formulaire .= '>'.$item1[1].'</OPTION>'."\n";
+				}
+      			$formulaire .= '</SELECT>';
+      			
+      			# kit 2
+      			
+      			$sql = "select `id`,`name` from `mag_class` where `planning` = 2 and station_id = ".CONFIG::ID_STATION." order by `name` asc";
+				$result1 = $html->query($sql);
+				$formulaire .= '<SELECT NAME="kit2" onchange="this.form.submit()">';
+       			$formulaire .= '<OPTION VALUE="-1">N/A</A>';
+				while ($item1 = mysqli_fetch_array($result1)) {
+					$formulaire .= '<OPTION VALUE="'.$item1[0].'"';
+					if ($item[11] == $item1[0]) {
+						$formulaire .= " SELECTED";
+					}
+					$formulaire .= '>'.$item1[1].'</OPTION>'."\n";
+				}
+      			$formulaire .= '</SELECT>';
+				
+				$formulaire .= '</td></tr>';
+			}elseif (($item[1]==2) and ($item[10]!="" or $item[11]!="")){
+				$formulaire .= '<tr><td>Pronostic&nbsp;:</td><td colspan="3">';
+				$formulaire .= $html->class_name($item[10]);
+				if ($item[10]>0 and $item[11]>0) {
+					$formulaire .= " / ";
+				}
+				$formulaire .= $html->class_name($item[11]);
+				$formulaire .= '<input type="hidden" name="kit1" value="'.($item[10]==NULL?"NULL":$item[10]).'">';
+				$formulaire .= '<input type="hidden" name="kit2" value="'.($item[11]==NULL?"NULL":$item[11]).'">';
+				$formulaire .= '</td></tr>';
+			}else{
+				$formulaire .= '<input type="hidden" name="kit1" value="'.($item[10]==NULL?"NULL":$item[10]).'">';
+				$formulaire .= '<input type="hidden" name="kit2" value="'.($item[11]==NULL?"NULL":$item[11]).'">';
+			}
 
-                        # INFO        #####################################################################
+            # TOURNAGE ###################################################################
 
-                        $formulaire.= '<tr height="120"><td>Info&nbsp;:<p><!--input class="bouton_in" type="submit" /--></td><td colspan="3">';
-                        $formulaire.= '<textarea rows = "8" cols = "74" name = "info">'.$item[6].'</textarea>';
-                        $formulaire.= "</td></tr>";
+            $formulaire.= '<tr><td>Tournage&nbsp;:</td><td colspan="3">';
+            $formulaire.= '<input SIZE="80" TYPE="text" NAME="slug" VALUE="'.$item[7].'" ></td>';
+            $formulaire.= "</tr>";
 
-			# STOP   DATE ####################################################################
+            # INFO #######################################################################
+
+            $formulaire.= '<tr height="120"><td>Info&nbsp;:<p><!--input class="bouton_in" type="submit" /--></td><td colspan="3">';
+            $formulaire.= '<textarea rows = "8" cols = "74" name = "info">'.$item[6].'</textarea>';
+            $formulaire.= "</td></tr>";
+
+			# STOP DATE ##################################################################
+
 			$formulaire.= "<tr><td>Retour&nbsp;:</td><td>";
 			$formulaire.= '<SELECT NAME="only_date_stop" onchange="this.form.submit()">';
 			for ($i = -90; $i <= 90; $i++) {
@@ -648,7 +723,7 @@ if ($concept=="RESAS"){ 		######################################################
 			$formulaire .= '</SELECT>';
 			$formulaire .= '</td>';
 
-			# STOP   HEURE ####################################################################
+			# STOP   HEURE ###############################################################
 
 			$formulaire .= '<td>';
 			$secondes = intval( substr($item[3],-8,2) )*60*60 + intval( substr($item[3],-5,2) )*60;
@@ -661,13 +736,13 @@ if ($concept=="RESAS"){ 		######################################################
 			$formulaire .= '</SELECT>';
 			$formulaire .= '</td>';
 
-			# RACK ###########################################################################
+			# RACK #######################################################################
 
 			$formulaire .= '<td>';
 			$formulaire .= $html->rackselect("mag_rack","id" ,"name",$item[9],"stop");
 			$formulaire .= '</td></tr>';
 
-			# INFO        #####################################################################
+			# INFO #######################################################################
 
 			$formulaire.= '<tr><td></td><td colspan="3">';
 			$formulaire.= '<input type="submit" class="bouton_in" value="Enregistrer">';
@@ -744,9 +819,14 @@ if ($concept=="RESAS"){ 		######################################################
 					}
 				}
 			}
-			if ($list<>"ADD" and $list<>"REMOVE") {
-				# $formulaire.= $html->menuselect("mag_class","id" ,"name",$classe);
-				# LISTE DU MATERIEL DE LA CLASSE DISPONIBLE
+			
+			/*
+			
+			# LISTE DU MATERIEL DE LA CLASSE DISPONIBLE
+			
+			# if ($list<>"ADD" and $list<>"REMOVE") {
+				$formulaire.= $html->menuselect("mag_class","id" ,"name",$classe);
+				
 				if ($classe > 0) {
 					$sql = 'SELECT  a.id,
 						`mag_brand`.`name`,
@@ -794,7 +874,9 @@ if ($concept=="RESAS"){ 		######################################################
 						$formulaire.= " Cettre classe ne contient pas d'objet disponible.";
 					}
 				}
-			}
+			# }
+			
+			*/
 
 			# INDICATION DU BARCODE
 
@@ -874,16 +956,15 @@ if ($concept=="RESAS"){ 		######################################################
 			$formulaire .= '</form>';
 			$html->body.= $formulaire;
 		}
-		$html->body.= "";
 	} else {
 
-                # LA RESA N'EXISTE PAS DONC ON PREPARE UN FORMULAIRE
+        # LA RESA N'EXISTE PAS DONC ON PREPARE UN FORMULAIRE
 
-                $html->body.= "<table width=\"100%\">";
+        $html->body.= "<table width=\"100%\">";
 
-                if ($html->uid==-1) {
+        if ($html->uid==-1) {
                         $html->body.="<tr><td class=\"level1\">Pour créer une réservation il faut être identifié. Merci.</td></tr>";
-                }else{
+        }else{
                         $html->body.= "<h1>Nouvelle réservation</h1>";
                         $html->body.= '<form enctype="multipart/form-data" method="post">';
 
@@ -891,6 +972,7 @@ if ($concept=="RESAS"){ 		######################################################
                         $html->body.= '<input type="hidden" name="new" value="new">';
 
                         # DATE ET HEURE START ##################################################################
+
                         $html->body.= "<tr><td>Départ&nbsp;:</td><td>";
                         $html->body.= '<SELECT NAME="only_date_start" onchange="this.form.submit()">';
 
@@ -910,7 +992,7 @@ if ($concept=="RESAS"){ 		######################################################
                         $html->body .= '</SELECT>';
                         $html->body .= '</form>';
                         $html->body .= '</td></tr>';
-                }
+        }
 
 		$html->body .= '</table>';
 
@@ -1084,8 +1166,22 @@ if ($concept=="RESAS"){ 		######################################################
 						" AND unix_timestamp(mag_resa.date_stop)-86400 > ".$unixdate.")".
 						" AND not(unix_timestamp(mag_resa.date_start) <= ".$unixdate.
 						" AND unix_timestamp(mag_resa.date_stop) < ".$unixdate.")".
+						" UNION".
+						" SELECT 	mag_resa.id,
+						mag_resa.slug,
+						mag_resa.date_start,
+						mag_resa.date_stop,
+						mag_resa.level,
+						mag_resa.contact_id".
+						" FROM mag_resa".
+						" WHERE mag_resa.level<=2 and (mag_resa.kit1=".$item_class[0].
+						" OR mag_resa.kit2=".$item_class[0].")".
+						" AND not(unix_timestamp(mag_resa.date_start)-86400 >= ".$unixdate.
+						" AND unix_timestamp(mag_resa.date_stop)-86400 > ".$unixdate.")".
+						" AND not(unix_timestamp(mag_resa.date_start) <= ".$unixdate.
+						" AND unix_timestamp(mag_resa.date_stop) < ".$unixdate.")".
 						" GROUP by mag_resa.id".
-						" ORDER by mag_inventaire.class_id DESC,date_start,level";
+						" ORDER by date_start,level";
 					$result =  $html->query($query);
 					$table.='<td class="td_planning_cell">';
 					if (mysqli_num_rows($result)!=0) {
