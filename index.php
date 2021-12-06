@@ -1,6 +1,6 @@
 <?php
 /*
- * 211203 CADIOU.DEV
+ * 211206 CADIOU.DEV
  * RT ERP / index.php
  *
  */
@@ -93,6 +93,8 @@ class HTML {
 			$this->menu.='<a href="?concept=PLANNING" class="menubut">PLANNING</a> ';
 		}else{
 			$this->menu.='<a href="?concept=PLANNING" class="menuact">PLANNING</a> ';
+			$this->menu.='<a href="/pdf/demo/html2ps.php?process_mode=single&URL=http%3A%2F%2F127.0.0.1%2Ferp%2F%3Fconcept%3DPLANNING%26page%3Dpdf&proxy=&pixels=1920&scalepoints=1&renderimages=1&renderlinks=0&renderfields=1&media=A3&cssmedia=Screen&leftmargin=10&rightmargin=10&topmargin=10&bottommargin=10&encoding=&headerhtml=RT%20FRANCE%20PLANNING%20MAGASIN&footerhtml=&watermarkhtml=&toc-location=before&smartpagebreak=1&pslevel=3&method=fpdf&pdfversion=1.3&output=1&convert=Convert+File
+" class="menuact">PDF</a> ';
 		}
 		if ($concept<>"INVENTAIRE") {
 			$this->menu.='<a href="?concept=INVENTAIRE" class="menubut">INVENTAIRE</a> ';
@@ -305,7 +307,7 @@ class HTML {
 			"`mag_item_log`.level,".
 			"`mag_item_log`.snapshot,`mag_item_log`.active,`mag_item_log`.uid,".
 			"`mag_class`.name,`mag_brand`.name,`mag_model`.reference,".
-			"`mag_inventaire`.tag".
+			"`mag_inventaire`.tag, if(mag_inventaire.creation IS NULL,-1,TIMESTAMPDIFF(WEEK, mag_inventaire.creation, CURDATE()))".
 			" FROM `mag_item_log`,`mag_class`,`mag_brand`,`mag_model`,`mag_inventaire`".
 			" WHERE mag_item_log.station_id = ".CONFIG::ID_STATION.
 			" AND `mag_class`.`id`=`mag_inventaire`.`class_id`".
@@ -316,7 +318,7 @@ class HTML {
 		if (mysqli_num_rows($result)!=0) {
 			$out= "<table width=\"100%\">";
 			while ($item = mysqli_fetch_array($result)) {
-				$out.= '<tr'.($show_item?' class="tr_hover" onclick="window.location.href = \'?concept=INVENTAIRE&item_id='.$item[1].'\'':"").'">';
+				$out.= '<tr'.($show_item?' class="tr_'.($item[13]==0?"new":"hover").'" onclick="window.location.href = \'?concept=INVENTAIRE&item_id='.$item[1].'\'':"").'">';
 				$out.= "<td>".$item['datetime']."</td>";
 				if ($show_item) {
 					$out.= "<td>".$item[9]."</td>";
@@ -637,7 +639,7 @@ if ($concept=="RESAS"){ 		######################################################
 			# KIT PREVU ##################################################################
 			
 			if ($item[1]==1) {
-				$formulaire .= '<tr><td>Pronostic&nbsp;:</td><td colspan="3">';
+				$formulaire .= '<tr><td>Prévision&nbsp;:</td><td colspan="3">';
 				
 				# kit 1
 				
@@ -671,7 +673,7 @@ if ($concept=="RESAS"){ 		######################################################
 				
 				$formulaire .= '</td></tr>';
 			}elseif (($item[1]==2) and ($item[10]!="" or $item[11]!="")){
-				$formulaire .= '<tr><td>Pronostic&nbsp;:</td><td colspan="3">';
+				$formulaire .= '<tr><td>Prévision&nbsp;:</td><td colspan="3">';
 				$formulaire .= $html->class_name($item[10]);
 				if ($item[10]>0 and $item[11]>0) {
 					$formulaire .= " / ";
@@ -942,7 +944,7 @@ if ($concept=="RESAS"){ 		######################################################
 					}
 					$formulaire.= "</table>";
 					if ($level>=3) {
-						$formulaire.= '<table class="menubar"><tr height="50"><th><a class="menubut" href="?concept=RESA_OUT&list=print&id='.$id.'">Fiche de sortie</a></th>';
+						$formulaire.= '<table class="menubar"><tr height="50"><th><a class="menubut" href="?concept=RESA_OUT&list=print&id='.$id.'">Imprimer la fiche de sortie</a></th>';
 						$formulaire.= '<th><a class="menubut" href="?concept=RESA_OUT&list=ATA&id='.$id.'">Carnet ATA</a></th></tr></table>';
 					}
 			}else{
@@ -1067,7 +1069,11 @@ if ($concept=="RESAS"){ 		######################################################
 
 	}
 	$html->out();
-}elseif ($concept=="PLANNING"){ #################################################################################	PLANNING
+	
+}elseif ($concept=="PLANNING"){ 
+
+	###########################################################################	PLANNING
+
 	$html->head.= "<meta HTTP-EQUIV=\"Refresh\" CONTENT=\"30\">\n";
 	$week = substr("0".(isset($_GET['week'])?$_GET['week']:date('W')),-2);
 	$year = (isset($_GET['year'])?$_GET['year']:date('Y'));
@@ -1083,22 +1089,24 @@ if ($concept=="RESAS"){ 		######################################################
 	};
 	$table = "<table>";
 
-	# NAVIGATION
-	$table.= '<tr>';
-	$table.= '<td colspan=2 class=arrow       ><a href="?n='.($n+1).($page<>""?'&page='.$page:"").'&year='.
-		date("Y",strtotime($year."W".$week."7-".($n+1)."week")).'&week='.
-		date("W",strtotime($year."W".$week."7-".($n+1)."week")).
-		'">&larr;</a></td>';
-	$table.= '<td colspan='.($y-3).' class="td_center" ><a href="?n='.($n+1).($page==""?'&page=compact':"").($page=="compact"?'&page=print':"").'&year='.
-		$year.'&week='.
-		$week.
-		'">'.date("Y",strtotime($year."W".$week)).'</a></td>';
-	$table.= '<td colspan=2 class=arrow_droite><a href="?n='.($n+1).($page<>""?'&page='.$page:"").'&year='.
-		date("Y",strtotime($year."W".$week."7+".($n+1)."week")).'&week='.
-	    date("W",strtotime($year."W".$week."7+".($n+1)."week")).
-	    '">&rarr;</a></td>';
-	$table.= '</tr>';
-
+	if ($page<>"pdf") {
+		# NAVIGATION
+		$table.= '<tr>';
+		$table.= '<td colspan=2 class=arrow       ><a href="?n='.($n+1).($page<>""?'&page='.$page:"").'&year='.
+			date("Y",strtotime($year."W".$week."7-".($n+1)."week")).'&week='.
+			date("W",strtotime($year."W".$week."7-".($n+1)."week")).
+			'">&larr;</a></td>';
+		$table.= '<td colspan='.($y-3).' class="td_center" ><a href="?n='.($n+1).($page==""?'&page=compact':"").($page=="compact"?'&page=print':"").'&year='.
+			$year.'&week='.
+			$week.
+			'">'.date("Y",strtotime($year."W".$week)).'</a></td>';
+		$table.= '<td colspan=2 class=arrow_droite><a href="?n='.($n+1).($page<>""?'&page='.$page:"").'&year='.
+			date("Y",strtotime($year."W".$week."7+".($n+1)."week")).'&week='.
+		    date("W",strtotime($year."W".$week."7+".($n+1)."week")).
+		    '">&rarr;</a></td>';
+		$table.= '</tr>';
+	}
+	
 	# JOURS DE LA SEMAINE
 	$table.='<tr><td width="'.(100/($y+1)).'%"></td>';
 	for ($i = 0; $i <$y ; $i++) {
@@ -1235,7 +1243,22 @@ if ($concept=="RESAS"){ 		######################################################
 	}
 	$table.= "</table>";
 	$html->body($table);
-	$html->out();
+
+	if ($page=="pdf") {
+		echo "<html>\n";
+		echo "<head>\n";
+		echo $html->head;
+		echo "</head>\n";
+		echo "<body>\n";
+		#echo $this->menu;
+		echo $html->body;
+		#echo $this->foot;
+		echo "</body>\n";
+		echo "</html>";
+	}else{
+		$html->out();
+	}
+
 }elseif ($concept=="INVENTAIRE"){ ###############################################################################	INVENTAIRE
 	# SCANNER GENERAL #
 	if (($list<>"LEARN")and(isset($_POST['scanner']))) {
@@ -1252,6 +1275,9 @@ if ($concept=="RESAS"){ 		######################################################
 			}
 		}
 	}
+	
+	# ITEM INDIVIDUEL
+	
 	if ($item_id>0){
 		$id = $item_id;
 		# INSCRIPTION EN BASE DES NOUVELLES DONNEES POSTEES PAR FORMULAIRE
@@ -1358,7 +1384,8 @@ if ($concept=="RESAS"){ 		######################################################
 			." mag_model.prix, mag_model.poids, mag_model.origine,"
 			." mag_status.id, mag_status.name, mag_inventaire.model_id,"
 			." mag_model.brand_id, mag_inventaire.class_id, mag_area.id,"
-			." mag_category.name, mag_inventaire.barcode, mag_model.category_id "
+			." mag_category.name, mag_inventaire.barcode, mag_model.category_id,"
+			." mag_inventaire.creation"
 			." FROM mag_area,mag_brand,mag_class,mag_inventaire,mag_model,mag_status,mag_category"
 			." WHERE mag_category.id = mag_model.category_id AND mag_area.id = mag_inventaire.area_id AND mag_brand.id = mag_model.brand_id AND"
 			." mag_model.id = mag_inventaire.model_id AND mag_status.id = mag_inventaire.status_id AND mag_inventaire.class_id = mag_class.id AND"
@@ -1458,6 +1485,10 @@ if ($concept=="RESAS"){ 		######################################################
 			# SERIAL NUMBER
 			if ($item[5]<>NULL) {
 				$html->body.= '<tr><td>Serial number&nbsp;:</td><td>'.      $item[5].'</td></tr>';
+			}
+			# CREATION
+			if ($item[25]<>NULL) {
+				$html->body.= '<tr><td>Date de création&nbsp;:</td><td>'.$item[25].'</td></tr>';
 			}
 			# BARCODE
 			if (($item[23]<>NULL)or($list=="LEARN")) {
@@ -1590,7 +1621,9 @@ if ($concept=="RESAS"){ 		######################################################
 		# Historique
 		$html->h2("Historique");
 		$html->mag_historique("AND `mag_item_log`.active = 1 AND item_id=".$id." ORDER BY datetime DESC LIMIT 20",false);		
+	
 	#### ITEM LIST ################################################################################################################################################################
+	
 	}elseif ($list=="ITEM"){
 		# ENTETE CONTEXTUEL
 		if ($class_id>=0) {
@@ -1641,7 +1674,8 @@ if ($concept=="RESAS"){ 		######################################################
 			`mag_status`.`id`,
 			`mag_inventaire`.`model_id`,
 			`mag_model`.`brand_id`,
-			`mag_inventaire`.`class_id`
+			`mag_inventaire`.`class_id`,
+			if(mag_inventaire.creation IS NULL,-1,TIMESTAMPDIFF(WEEK, mag_inventaire.creation, CURDATE()))
 			FROM `mag_inventaire`,`mag_status`,`mag_model`,`mag_class`,`mag_brand`,`mag_area`';
 
 		# REQUETE
@@ -1690,7 +1724,7 @@ if ($concept=="RESAS"){ 		######################################################
 
 		$result = $html->query($sql);
 		while ($item = mysqli_fetch_array($result)) {
-			$html->body .= '<tr class="tr_'.($item_id==$item[0]?"selected":"hover").'" onclick="window.location.href = \'?concept=INVENTAIRE&list=ITEM'.($class_id>0?'&class_id='.$class_id:'').'&item_id='.$item[0].'\'">'
+			$html->body .= '<tr class="tr_'.($item[18]==0?"new":"hover").'" onclick="window.location.href = \'?concept=INVENTAIRE&list=ITEM'.($class_id>0?'&class_id='.$class_id:'').'&item_id='.$item[0].'\'">'
 			.'<td>'.$item[1].'</td>'                                                                                # CLASS
 			.'<td>'.$item[5].'</td>'                                                                                # DESCRIPTION
 			.'<td>'.$item[3].'</td>'                                                                                # MARQUE
@@ -1835,7 +1869,7 @@ if ($concept=="RESAS"){ 		######################################################
 		$result = $html->query($sql);
 		while ($item = mysqli_fetch_array($result)) {
 			$html->body .= '<tr class="tr_hover" onclick="window.location.href = \'?concept=INVENTAIRE&list=ITEM&class_id='.$item[3].'\'">'
-			.'<td>'.($item[4]==1?"<b>":"").$item[0].($item[4]==1?"</b>":"").'</td>'
+			.'<td>'.($item[4]>=1?"<b>":"").$item[0].($item[4]>=1?"</b>":"").'</td>'
 			.'<td>'.$item[1].'</td>'
 			.'<td>'.$item[2].'</td>'
 			.'</tr>'."\n";
@@ -2285,38 +2319,55 @@ if ($concept=="RESAS"){ 		######################################################
 								a.`serial`,
 								a.`refMoscou`,
 								a.`model_id`,
-					mag_class.name
-					FROM `mag_inventaire` AS a,`mag_model`,`mag_brand`,mag_resa_item,mag_class ';
+								mag_class.name,
+								mag_category.name
+					FROM `mag_inventaire` AS a,`mag_model`,`mag_brand`,mag_resa_item,
+								mag_class, mag_category ';
 
 				$sql.= 'WHERE `mag_model`.`id`=a.`model_id` and
-						`mag_brand`.`id`=`mag_model`.`brand_id` and mag_class.id = a.class_id and ';
+						`mag_brand`.`id`=`mag_model`.`brand_id` and 
+						mag_category.id = mag_model.category_id and 
+						mag_class.id = a.class_id and ';
 				$sql.=  ' a.id = mag_resa_item.item_id AND mag_resa_item.resa_id='.$id;
-				$sql.= " ORDER BY `mag_model`.`description`,mag_brand.name,mag_model.reference";
+				$sql.= " ORDER BY mag_category.ord, `mag_model`.`description`,
+					mag_brand.name,mag_model.reference";
 				$result = $html->query($sql);
 				if (mysqli_num_rows($result)!=0) {
 					$formulaire=   '<h2>Liste du materiel emprunté</h2><table>';
 					# Headers
 					$formulaire.='<tr>
+						<th>&Eacute;quipement</th>
 						<th>Description</th>
 						<th>Marque</th>
 						<th>Modèle</th>
 						<th>Etiquette</th>
-						<!--th>N° Série</th-->
-						<!--th>Ref. Moscou</th-->
-						<!--th>Classe</th-->
-						<!--th></th-->
 						</tr>';
+					$blocs=array();
+					$nrow=1;
+					$ligne1="";
+					$ligne2="";
+					$category="";
 					while ($item = mysqli_fetch_array($result)) {
-						$formulaire .= '<tr>'
-						.'<td>'.$item[3].'</td>'
+						if ($item[9]==$category) {
+							$ligne2.="<tr>";
+						}else{
+							array_push($blocs, $ligne1.$ligne2);
+							$ligne1="";
+							$ligne2="";
+							$nrow=1;
+							$category=$item[9];
+						}
+						$ligne1 = 
+						 '<td rowspan="'.$nrow++.'">'.$item[9].'</td>';
+						$ligne2.=
+						 '<td>'.$item[3].'</td>'
 						.'<td>'.$item[1].'</td>'
 						.'<td>'.$item[2].'</td>'
-						.'<td>'.$item[4].'</td>'
-						.'<!--td>'.$item[5].'</td-->'
-						.'<!--td>'.($item[6]==0?"":($item[6]==-1?"":$item[6])).'</td-->'
-						.'<!--td class="tableau">'.$item[8].'</td-->'
-						.'<!--td class="tableau"></td-->'
-						.'</tr>'."\n";
+						.'<td>'.$item[4].'</td>';
+					}
+					array_push($blocs, $ligne1.$ligne2);
+					foreach($blocs as $bloc) {
+						$formulaire.= '<tr>'.$bloc.'</tr>'."\n";
 					}
 					$formulaire.= "</table>";
 				}
@@ -2347,6 +2398,9 @@ if ($concept=="RESAS"){ 		######################################################
 			</td></tr>
 			</table>
 			</body>
+			<script>
+			window.print();
+			</script>
 			<?php
 		}
 	}else{

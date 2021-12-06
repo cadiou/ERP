@@ -38,6 +38,14 @@ table {
 	background-color: #EBDD0F;
 }
 
+.tr_new {
+	background-color: #43b61d;
+}
+
+.tr_new:hover {
+	background-color: #EBDD0F;
+}
+
 .tr_date {
 	background-color: #d6d6d6;
 }
@@ -239,6 +247,12 @@ a:active {
 .status5 {
   background-color: 1d4061;
   color: white;
+  text-align: left;
+}
+
+.status6 {
+  background-color: d6d6d6;
+  color: black;
   text-align: left;
 }
 
