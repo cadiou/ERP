@@ -600,45 +600,63 @@ if ($concept=="RESAS"){ 		######################################################
 
             # ETAPE ##########################################################################
 
+			$sql = 'SELECT count(*) FROM mag_resa_item ';
+			$sql.= 'WHERE mag_resa_item.resa_id='.$id;
+			$result = $html->query($sql);
+			$itemnb = mysqli_fetch_array($result);
+			$nb_articles = $itemnb[0];
+
+
             $formulaire.= '<tr><td>Étape&nbsp;:</td><td colspan="3" class="level';
-            if ($item[1]==0) {
+            if ($level==0) {
                                 $formulaire.= "0";
-            }elseif ($item[1]==1) {
+            }elseif ($level==1) {
                                 $formulaire.= "0";
-            }elseif ($item[1]==2) {
+            }elseif ($level==2) {
                                 $formulaire.= "1";
-            }elseif ($item[1]==3) {
+            }elseif ($level==3) {
                                 $formulaire.= "3";
-            }elseif ($item[1]==4) {
+            }elseif ($level==4) {
                                 $formulaire.= "4";
-            }elseif ($item[1]==5) {
+            }elseif ($level==5) {
                                 $formulaire.= "2";
-            }elseif ($item[1]==6) {
+            }elseif ($level==6) {
                                 $formulaire.= "5";
             }
             $formulaire.= "\">";
             $formulaire.='<SELECT NAME="mag_phase_id" onchange="this.form.submit()">';
-            if ($level<=2) {
+            
+            if ($level<=1) {
                 $formulaire.='<OPTION VALUE="1" '.($level==1?"SELECTED":"").'>1-Prévisionnelle</OPTION>';
     	        $formulaire.='<OPTION VALUE="2" '.($level==2?"SELECTED":"").'>2-Confirmée - À préparer</OPTION>';
 			}
-    		if ($level>=2 and $level<=3) {
+			if ($level==2) {
+                $formulaire.='<OPTION VALUE="1" '.($level==1?"SELECTED":"").'>1-Prévisionnelle</OPTION>';
+    	        $formulaire.='<OPTION VALUE="2" '.($level==2?"SELECTED":"").'>2-Confirmée - À préparer</OPTION>';
+    	        if ($nb_articles > 0){
+	    	        $formulaire.='<OPTION VALUE="3" '.($level==3?"SELECTED":"").'>3-Armoire départ</OPTION>';
+	    	    }
+			}
+    		if ($level==3) {
+    			$formulaire.='<OPTION VALUE="2" '.($level==2?"SELECTED":"").'>2-Confirmée - modifiable</OPTION>';
             	$formulaire.='<OPTION VALUE="3" '.($level==3?"SELECTED":"").'>3-Armoire départ</OPTION>';
+            	$formulaire.='<OPTION VALUE="4" '.($level==4?"SELECTED":"").'>4-En cours</OPTION>';
             }
-            if ($level>=3 and $level<=4) {
+            if ($level==4) {
                 $formulaire.='<OPTION VALUE="4" '.($level==4?"SELECTED":"").'>4-En cours</OPTION>';
-            }
-            if ($level>=4 and $level<=5) {
                 $formulaire.='<OPTION VALUE="5" '.($level==5?"SELECTED":"").'>5-Armoire retour</OPTION>';
             }
-            if ($level>=6 and $level<=6) {
+            if ($level==5) {
+                $formulaire.='<OPTION VALUE="5" '.($level==5?"SELECTED":"").'>5-Armoire retour - À vérifier</OPTION>';
+            }
+            if ($level==6) {
                 $formulaire.='<OPTION VALUE="6" '.($level==6?"SELECTED":"").'>6-Vérifiée</OPTION></SELECT>';
             }
             $formulaire.= "</td></tr>";
 
 			# KIT PREVU ##################################################################
 			
-			if ($item[1]==1) {
+			if ($level==1) {
 				$formulaire .= '<tr><td>Prévision&nbsp;:</td><td colspan="3">';
 				
 				# kit 1
@@ -672,7 +690,7 @@ if ($concept=="RESAS"){ 		######################################################
       			$formulaire .= '</SELECT>';
 				
 				$formulaire .= '</td></tr>';
-			}elseif (($item[1]==2) and ($item[10]!="" or $item[11]!="")){
+			}elseif (($level==2) and ($item[10]!="" or $item[11]!="")){
 				$formulaire .= '<tr><td>Prévision&nbsp;:</td><td colspan="3">';
 				$formulaire .= $html->class_name($item[10]);
 				if ($item[10]>0 and $item[11]>0) {
@@ -696,7 +714,8 @@ if ($concept=="RESAS"){ 		######################################################
             # INFO #######################################################################
 
             $formulaire.= '<tr height="120"><td>Info&nbsp;:<p><!--input class="bouton_in" type="submit" /--></td><td colspan="3">';
-            $formulaire.= '<textarea rows = "8" cols = "74" name = "info">'.$item[6].'</textarea>';
+            $formulaire.= '<textarea rows = "4" cols = "74" name = "info">'.$item[6].'</textarea>';
+            $formulaire.= '<br><input type="submit" class="bouton_in" value="Enregistrer">';
             $formulaire.= "</td></tr>";
 
 			# STOP DATE ##################################################################
@@ -744,12 +763,6 @@ if ($concept=="RESAS"){ 		######################################################
 			$formulaire .= $html->rackselect("mag_rack","id" ,"name",$item[9],"stop");
 			$formulaire .= '</td></tr>';
 
-			# INFO #######################################################################
-
-			$formulaire.= '<tr><td></td><td colspan="3">';
-			$formulaire.= '<input type="submit" class="bouton_in" value="Enregistrer">';
-			$formulaire.= "</td></tr>";
-
 			$formulaire.= "</table><h1>Mat&eacute;riel</h1>";
 
 			############## SCANNER IN OUT
@@ -773,8 +786,12 @@ if ($concept=="RESAS"){ 		######################################################
 					$query="UPDATE mag_resa SET level=6 WHERE id=".$id;
 					$result =  $html->query($query);
 					$html->redirect="?concept=RESAS&id=".$id;
+				}elseif ($_POST['scanner']=="NULL") {
+					$query="UPDATE mag_resa SET level=2 WHERE id=".$id;
+					$result =  $html->query($query);
+					$html->redirect="?concept=RESAS&id=".$id;
 				}else{
-					if ($list=="ADD") {
+					if ($list=="ADD" and $level<=2) {
 						$query_bar = "SELECT id FROM mag_inventaire WHERE barcode ='".$_POST['scanner']."'";
 						$result_bar =  $html->query($query_bar);
 						if (mysqli_num_rows($result_bar)!=0) {
@@ -789,7 +806,7 @@ if ($concept=="RESAS"){ 		######################################################
 						}else{
 							$html->info = "Objet absent de la base";
 						}
-					}elseif ($list=="REMOVE") {
+					}elseif ($list=="REMOVE" and $level<=2) {
 						$query_bar = "SELECT id FROM mag_inventaire WHERE barcode ='".$_POST['scanner']."'";
 						$result_bar =  $html->query($query_bar);
 						if (mysqli_num_rows($result_bar)!=0) {
@@ -882,12 +899,58 @@ if ($concept=="RESAS"){ 		######################################################
 
 			# INDICATION DU BARCODE
 
-			if ($list=="ADD") {
-				$formulaire.= '<img src="barcodescanning.gif"><span class="bouton_in">SCANNEZ POUR AJOUTER</span>';
-			}elseif ($list=="REMOVE") {
-				$formulaire.= '<img src="barcodescanning.gif"><span class="bouton_out">SCANNEZ POUR RETIRER</span>';
+			if ($list=="ADD" and $level<=2) {
+			
+				# requete sur les classes de la resa. previsionnelle , pas previsionnelle.
+			
+				$sql = "SELECT kit1 as k from mag_resa WHERE id=".$id;
+				$sql.= " UNION SELECT kit2 as k from mag_resa WHERE id=".$id;
+				$sql.= " UNION SELECT class_id as k from mag_inventaire,mag_resa_item".
+						" WHERE mag_resa_item.item_id = mag_inventaire.id and mag_resa_item.resa_id=".$id;
+				$result = $html->query($sql);
+				$classes=array();
+				while ($item = mysqli_fetch_array($result)) {
+					if ($item[0]<>NULL) {
+						array_push($classes, $item[0]);
+					}
+				}
+				$formulaire.= '<table><tr><td width="200">';
+				$formulaire.= '<img src="barcodescanning.gif">';
+				$formulaire.= '</td><td class="level4">';
+				$formulaire.= 'SCANNEZ POUR AJOUTER</td>';
+				foreach($classes as $resa_classe) {
+					$sql = 'SELECT count(*) FROM mag_inventaire ';
+					$sql.= 'WHERE status_id=0 and class_id='.$resa_classe;
+					$result = $html->query($sql);
+					$item_total = mysqli_fetch_array($result);
+					$nb_articles_total = $item_total[0];
+					$sql = 'SELECT count(*) FROM mag_resa_item,mag_inventaire WHERE
+						 mag_inventaire.id = mag_resa_item.item_id and resa_id='.$id.
+						" and class_id=".$resa_classe;
+					$result = $html->query($sql);
+					$item_panier = mysqli_fetch_array($result);
+					$nb_articles_panier = $item_panier[0];
+					$formulaire.='<td class="level4">'.$html->class_name($resa_classe).
+						'<p><font size="+2">'.strval(intval($nb_articles_total)-intval($nb_articles_panier)).'</font></td>';
+				}
+				$formulaire.= '</tr></table>';
+			}elseif ($list=="REMOVE" and $level<=2) {
+				$formulaire.= '<table><tr><td width="200">';
+				$formulaire.= '<img src="barcodescanning.gif">';
+				$formulaire.= '</td><td class="level1">';
+				$formulaire.= 'SCANNEZ POUR RETIRER';
+				$formulaire.= '</td></tr></table>';
 			}elseif ($level==5) {
-				$formulaire.= '<img src="barcodescanning.gif"><span class="bouton_in">SCANNEZ POUR VERIFIER</span>';
+				$formulaire.= '<table><tr><td width="200">';
+				$formulaire.= '<img src="barcodescanning.gif">';
+				$formulaire.= '</td><td class="level2">';
+				$sql = 'SELECT count(*) FROM mag_resa_item WHERE
+						 mag_resa_item.verified=0 and resa_id='.$id;
+				$result = $html->query($sql);
+				$item_panier = mysqli_fetch_array($result);
+				$nb_articles_panier = $item_panier[0];
+				$formulaire.= 'SCANNEZ POUR VÉRIFIER <font size="+2">'.$nb_articles_panier.'</font> ARTICLES';
+				$formulaire.= '</td></tr></table>';
 			}
 
 			# PANIER #########################################################
@@ -1494,7 +1557,7 @@ if ($concept=="RESAS"){ 		######################################################
 			if (($item[23]<>NULL)or($list=="LEARN")) {
 				$html->body.= '<tr><td>Code-Barre&nbsp;:</td><td>';
 				if ($list=="ITEM") {
-					$html->body.= '<img src="/barcodegen/html/image.php?code=code128&o=1&t=30&r=2&text='.$item[23].'&f=0&a1=B&a2=" alt="'.$item[23].'">';
+					$html->body.= '<img src="/barcodegen/html/image.php?code=code128&o=1&t=30&r=2&text='.$item[23].'&f=0&a1=B&a2=" alt="'.$item[23].'"> '.$item[23];
 				}elseif ($list=="LEARN"){
 					$html->body.= '<img src="barcodescanning.gif">';
 				}
