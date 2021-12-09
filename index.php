@@ -1,6 +1,6 @@
 <?php
 /*
- * 211207 CADIOU.DEV
+ * 211209 CADIOU.DEV
  * RT ERP / index.php
  *
  */
@@ -59,7 +59,8 @@ class HTML {
 		}else{
 			$this->head="";
 		}
-		$this->head.= "<title>".(isset($_GET['concept'])?$_GET['concept']:'ERP').' '.$this->station(CONFIG::ID_STATION)."</title>\n";
+		$this->head.= "<title>".(isset($_GET['concept'])?$_GET['concept']:'ERP').' '.
+			$this->station(CONFIG::ID_STATION)."</title>\n";
 
 		$this->head.=
 		'<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />'."\n".
@@ -77,7 +78,8 @@ class HTML {
 		# FOOTER
 
 		$this->foot = "<hr />\n";
-		$this->foot .= $this->group(CONFIG::ID_GROUP)." / ".CONFIG::DB_NAME." / ".gethostname()."\n";
+		$this->foot .= $this->group(CONFIG::ID_GROUP)." / ".CONFIG::DB_NAME." / ".
+			gethostname()."\n";
 
 		# MENUBAR
 
@@ -93,8 +95,13 @@ class HTML {
 			$this->menu.='<a href="?concept=PLANNING" class="menubut">PLANNING</a> ';
 		}else{
 			$this->menu.='<a href="?concept=PLANNING" class="menuact">PLANNING</a> ';
-			$this->menu.='<a href="/pdf/demo/html2ps.php?process_mode=single&URL=http%3A%2F%2F127.0.0.1%2Ferp%2F%3Fconcept%3DPLANNING%26page%3Dpdf&proxy=&pixels=1920&scalepoints=1&renderimages=1&renderlinks=0&renderfields=1&media=A3&cssmedia=Screen&leftmargin=10&rightmargin=10&topmargin=10&bottommargin=10&encoding=&headerhtml=RT%20FRANCE%20PLANNING%20MAGASIN&footerhtml=&watermarkhtml=&toc-location=before&smartpagebreak=1&pslevel=3&method=fpdf&pdfversion=1.3&output=1&convert=Convert+File
-" class="menuact">PDF</a> ';
+			$this->menu.='<a href="/pdf/demo/html2ps.php?process_mode=single&URL=http%3A'.
+			'%2F%2F127.0.0.1%2Ferp%2F%3Fconcept%3DPLANNING%26page%3Dpdf&proxy=&pixels=19'.
+			'20&scalepoints=1&renderimages=1&renderlinks=0&renderfields=1&media=A3&cssme'.
+			'dia=Screen&leftmargin=10&rightmargin=10&topmargin=10&bottommargin=10&encodi'.
+			'ng=&headerhtml=RT%20FRANCE%20PLANNING%20MAGASIN&footerhtml=&watermarkhtml=&'.
+			'toc-location=before&smartpagebreak=1&pslevel=3&method=fpdf&pdfversion=1.3&o'.
+			'utput=1&convert=Convert+File" class="menuact">PDF</a> ';
 		}
 		if ($concept<>"INVENTAIRE") {
 			$this->menu.='<a href="?concept=INVENTAIRE" class="menubut">INVENTAIRE</a> ';
@@ -154,7 +161,8 @@ class HTML {
 		$this->menu .= "</FORM>";
 		$this->menu .= "<FORM method=\"POST\">";
 		# UTILISATEUR
-		$sql = "select `id`,`name` from user where name is not null and active = true and station_ID = ".CONFIG::ID_STATION." order by `name` asc";
+		$sql = "select `id`,`name` from user where name is not null and active = true and station_ID = ".
+			CONFIG::ID_STATION." order by `name` asc";
 		$result = $this->query($sql);
 		$this->menu .= '<SELECT NAME="user_id" onchange="this.form.submit()">';
 		$this->menu .= '<OPTION VALUE="-1">Identifiez-vous !</A>';
@@ -222,7 +230,9 @@ class HTML {
 		}else{
 			$inactivity = "";
 		}
-		$sql = "select `".$value."`,`".$option."` from `".$table."` where `".$value."` is not null and station_id = ".CONFIG::ID_STATION.$inactivity." order by `".$option."` asc";
+		$sql = "select `".$value."`,`".$option."` from `".$table."` where `".
+			$value."` is not null and station_id = ".CONFIG::ID_STATION.$inactivity.
+			" order by `".$option."` asc";
 		$result = $this->query($sql);
 		$out  = '<SELECT NAME="'.$table."_".$value.'" onchange="this.form.submit()">';
        	$out .= '<OPTION VALUE="-1">N/A</A>';
@@ -254,7 +264,61 @@ class HTML {
 			function beep() {
 			(new
 			Audio(
-			"data:audio/wav;base64,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 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////VEFHAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAU291bmRib3kuZGUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMjAwNGh0dHA6Ly93d3cuc291bmRib3kuZGUAAAAAAAAAACU="
+			"data:audio/wav;base64,//uQRAAAAWMSLwUIYAAsYkXgoQwAEaYLWfkWgAI0wWs/ItAAAGDgY".
+			"tAgAyN+QWaAAihwMWm4G8QQRDiMcCBcH3Cc+CDv/7xA4Tvh9Rz/y8QADBwMWgQAZG/ILNAARQ4G".
+			"LTcDeIIIhxGOBAuD7hOfBB3/94gcJ3w+o5/5eIAIAAAVwWgQAVQ2ORaIQwEMAJiDg95G4nQL7mQ".
+			"VWI6GwRcfsZAcsKkJvxgxEjzFUgfHoSQ9Qq7KNwqHwuB13MA4a1q/DmBrHgPcmjiGoh//EwC5nG".
+			"PEmS4RcfkVKOhJf+WOgoxJclFz3kgn//dBA+ya1GhurNn8zb//9NNutNuhz31f////9vt///z+I".
+			"dAEAAAK4LQIAKobHItEIYCGAExBwe8jcToF9zIKrEdDYIuP2MgOWFSE34wYiR5iqQPj0JIeoVdl".
+			"G4VD4XA67mAcNa1fhzA1jwHuTRxDUQ//iYBczjHiTJcIuPyKlHQkv/LHQUYkuSi57yQT//uggfZ".
+			"NajQ3Vmz+ Zt//+mm3Wm3Q576v////+32///5/EOgAAADVghQAAAAA//uQZAUAB1WI0PZugAAAA".
+			"AoQwAAAEk3nRd2qAAAAACiDgAAAAAAABCqEEQRLCgwpBGMlJkIz8jKhGvj4k6jzRnqasNKIeoh5".
+			"gI7BJaC1A1AoNBjJgbyApVS4IDlZgDU5WUAxEKDNmmALHzZp0Fkz1FMTmGFl1FMEyodIavcCAUH".
+			"DWrKAIA4aa2oCgILEBupZgHvAhEBcZ6joQBxS76AgccrFlczBvKLC0QI2cBoCFvfTDAo7eoOQIn".
+			"qDPBtvrDEZBNYN5xwNwxQRfw8ZQ5wQVLvO8OYU+mHvFLlDh05Mdg7BT6YrRPpCBznMB2r//xKJj".
+			"yyOh+cImr2/4doscwD6neZjuZR4AgAABYAAAABy1xcdQtxYBYYZdifkUDgzzXaXn98Z0oi9ILU5".
+			"mBjFANmRwlVJ3/6jYDAmxaiDG3/6xjQQCCKkRb/6kg/wW+kSJ5//rLobkLSiKmqP/0ikJuDaSaS".
+			"f/6JiLYLEYnW/+kXg1WRVJL/9EmQ1YZIsv/6Qzwy5qk7/+tEU0nkls3/zIUMPKNX/6yZLf+kFgA".
+			"fgGyLFAUwY//uQZAUABcd5UiNPVXAAAApAAAAAE0VZQKw9ISAAACgAAAAAVQIygIElVrFkBS+Jh".
+			"i+EAuu+lKAkYUEIsmEAEoMeDmCETMvfSHTGkF5RWH7kz/ESHWPAq/kcCRhqBtMdokPdM7vil7RG".
+			"98A2sc7zO6ZvTdM7pmOUAZTnJW+NXxqmd41dqJ6mLTXxrPpnV8avaIf5SvL7pndPvPpndJR9Kuu".
+			"8fePvuiuhorgWjp7Mf/PRjxcFCPDkW31srioCExivv9lcwKEaHsf/7ow2Fl1T/9RkXgEhYElAoC".
+			"LFtMArxwivDJJ+bR1HTKJdlEoTELCIqgEwVGSQ+hIm0NbK8WXcTEI0UPoa2NbG4y2K00JEWbZav".
+			"JXkYaqo9CRHS55FcZTjKEk3NKoCYUnSQ 0rWxrZbFKbKIhOKPZe1cJKzZSaQrIyULHDZmV5K4xy".
+			"SsDRKWOruanGtjLJXFEmwaIbDLX0hIPBUQPVFVkQkDoUNfSoDgQGKPekoxeGzA4DUvnn4bxzcZr".
+			"tJyipKfPNy5w+9lnXwgqsiyHNeSVpemw4bWb9psYeq//uQZBoABQt4yMVxYAIAAAkQoAAAHvYpL".
+			"5m6AAgAACXDAAAAD59jblTirQe9upFsmZbpMudy7Lz1X1DYsxOOSWpfPqNX2WqktK0DMvuGwlbN".
+			"j44TleLPQ+Gsfb+GOWOKJoIrWb3cIMeeON6lz2umTqMXV8Mj30yWPpjoSa9ujK8SyeJP5y5mOW1".
+			"D6hvLepeveEAEDo0mgCRClOEgANv3B9a6fikgUSu/DmAMATrGx7nng5p5iimPNZsfQLYB2sDLIk".
+			"zRKZOHGAaUyDcpFBSLG9MCQALgAIgQs2YunOszLSAyQYPVC2YdGGeHD2dTdJk1pAHGAWDjnkcLK".
+			"FymS3RQZTInzySoBwMG0QueC3gMsCEYxUqlrcxK6k1LQQcsmyYeQPdC2YfuGPASCBkcVMQQqpVJ".
+			"shui1tkXQJQV0OXGAZMXSOEEBRirXbVRQW7ugq7IM7rPWSZyDlM3IuNEkxzCOJ0ny2ThNkyRai1".
+			"b6ev//3dzNGzNb//4uAvHT5sURcZCFcuKLhOFs8mLAAEAt4UWAAIABAAAAAB4qbHo0tIjVkUU//".
+			"uQZAwABfSFz3ZqQAAAAAngwAAAE1HjMp2qAAAAACZDgAAAD5UkTE1UgZEUExqYynN1qZvqIOREE".
+			"FmBcJQkwdxiFtw0qEOkGYfRDifBui9MQg4QAHAqWtAWHoCxu1Yf4VfWLPIM2mHDFsbQEVGwyqQo".
+			"QcwnfHeIkNt9YnkiaS1oizycqJrx4KOQjahZxWbcZgztj2c49nKmkId44S71j0c8eV9yDK6uPRz".
+			"x5X18eDvjvQ6yKo9ZSS6l//8elePK/Lf//IInrOF/FvDoADYAGBMGb7 FtErm5MXMlmPAJQVgWt".
+			"a7Zx2go+8xJ0UiCb8LHHdftWyLJE0QIAIsI+UbXu67dZMjmgDGCGl1H+vpF4NSDckSIkk7Vd+sx".
+			"EhBQMRU8j/12UIRhzSaUdQ+rQU5kGeFxm+hb1oh6pWWmv3uvmReDl0UnvtapVaIzo1jZbf/pD6E".
+			"lLqSX+rUmOQNpJFa/r+sa4e/pBlAABoAAAAA3CUgShLdGIxsY7AUABPRrgCABdDuQ5GC7DqPQCg".
+			"bbJUAoRSUj+NIEig0YfyWUho1VBBBA//uQZB4ABZx5zfMakeAAAAmwAAAAF5F3P0w9GtAAACfAA".
+			"AAAwLhMDmAYWMgVEG1U0FIGCBgXBXAtfMH10000EEEEEECUBYln03TTTdNBDZopopYvrTTdNa32".
+			"5mImNg3TTPV9q3pmY0xoO6bv3r00y+IDGid/9aaaZTGMuj9mpu9Mpio1dXrr5HERTZSmqU36A3C".
+			"umzN/9Robv/Xx4v9ijkSRSNLQhAWumap82WRSBUqXStV/YcS+XVLnSS+WLDroqArFkMEsAS+eWm".
+			"rUzrO0oEmE40RlMZ5+ODIkAyKAGUwZ3mVKmcamcJnMW26MRPgUw6j+LkhyHGVGYjSUUKNpuJUQo".
+			"OIAyDvEyG8S5yfK6dhZc0Tx1KI/gviKL6qvvFs1+bWtaz58uUNnryq6kt5RzOCkPWlVqVX2a/EE".
+			"BUdU1KrXLf40GoiiFXK///qpoiDXrOgqDR38JB0bw7SoL+ZB9o1RCkQjQ2CBYZKd/+VJxZRRZlq".
+			"SkKiws0WFxUyCwsKiMy7hUVFhIaCrNQsKkTIsLivwKKigsj8XYlwt/WKi2N4d//uQRCSAAjURNI".
+			"HpMZBGYiaQPSYyAAABLAAAAAAAACWAAAAApUF/Mg+0aohSIRobBAsMlO//Kk4soosy1JSFRYWaL".
+			"C4qZBYWFRGZdwqKiwkNBVmoWFSJkWFxX4FFRQWR+LsS4W/rFRb/////////////////////////".
+			"/// ///////////////////////////////////////////////////////////////////////".
+			"///////////////////////////////////////////////////////////////////////////".
+			"///////////////////////////////////////////////////////////////////////////".
+			"///////////////////////////////////////////////////////////////////////////".
+			"///////////////////////////////////////////////////////////////////////////".
+			"//////////////////VEFHAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAU291bmRib3kuZ".
+			"GUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMjAwNGh0".
+			"dHA6Ly93d3cuc291bmRib3kuZGUAAAAAAAAAACU="
 			)).play();
 			}
 			beep();
@@ -288,20 +352,6 @@ class HTML {
         return $out;
     }
 	public function mag_historique($order,$show_item) {
-		# SELECTION
-		# 0 `mag_item_log`.id
-		# 1 `mag_item_log`.item_id
-		# 2 `mag_item_log`.datetime
-		# 3 `mag_item_log`.initials
-		# 4 `mag_item_log`.body
-		# 5 `mag_item_log`.level
-		# 6 `mag_item_log`.snapshot
-		# 7 `mag_item_log`.active
-		# 8 `mag_item_log`.uid
-		# 9 `mag_class`.name
-		#10 `mag_brand`.name
-		#11 `mag_model`.reference
-		#12 `mag_inventaire`.tag
 		$query = "SELECT `mag_item_log`.id,`mag_item_log`.item_id,".
 			"`mag_item_log`.datetime,`mag_item_log`.initials,`mag_item_log`.body,".
 			"`mag_item_log`.level,".
@@ -410,7 +460,8 @@ class HTML {
 		}else{
 			$inactivity = "";
 		}
-		$sql = "select `".$value."`,`".$option."` from `".$table."` where `".$value."` is not null and station_id = ".CONFIG::ID_STATION.$inactivity." order by `".$option."` asc";
+		$sql = "select `".$value."`,`".$option."` from `".$table."` where `".$value.
+			"` is not null and station_id = ".CONFIG::ID_STATION.$inactivity." order by `".$option."` asc";
 		$result = $this->query($sql);
 		$out  = '<SELECT NAME="'.$prefix."_".$table."_".$value.'" onchange="this.form.submit()">';
        	$out .= '<OPTION VALUE="-1">N/A</A>';
@@ -440,6 +491,7 @@ $model_id=		(isset($_POST['model_id'])?			$_POST['model_id']:			(isset($_GET['mo
 $area_id=		(isset($_POST['area_id'])?			$_POST['area_id']:			(isset($_GET['area_id'])?			$_GET['area_id']:			-1	));
 $start_rack_id=	(isset($_POST['start_mag_rack_id'])?$_POST['start_mag_rack_id']:(isset($_GET['start_mag_rack_id'])?	$_GET['start_mag_rack_id']:	0	));
 $stop_rack_id=	(isset($_POST['stop_mag_rack_id'])?	$_POST['stop_mag_rack_id']:	(isset($_GET['stop_mag_rack_id'])?	$_GET['stop_mag_rack_id']:	0	));
+$status_id=		(isset($_POST['status_id'])?		$_POST['status_id']:		(isset($_GET['status_id'])?			$_GET['status_id']:		-1	));
 $search=		(isset($_POST['search'])?	  		$_POST['search']:			(isset($_GET['search'])?			$_GET['search']:	""	));
 $kit1=			(isset($_POST['kit1'])?				$_POST['kit1']:				-1);
 $kit2=			(isset($_POST['kit2'])?				$_POST['kit2']:				-1);
@@ -466,7 +518,7 @@ if (substr($scanner,0,4)=="USER") {
 
 $html = new html($concept,$list);
 
-if ($concept=="RESAS"){ 		#################################################################################	RESAS
+if ($concept=="RESAS"){ 		###################################################	RESAS
 	$order_by 	= (isset($_GET['order_by'])?$_GET['order_by']:"mag_resa.date_start");
 	if (isset($_POST['new'])) {
 		# NOUVELLE RESA = ON LA CREE ET ON RECUPERE UN ID
@@ -528,7 +580,8 @@ if ($concept=="RESAS"){ 		######################################################
 		# ADD A CLASS ######################################################
 		if (isset($_POST['add_to_resa_class'])) {
 			$query = 'REPLACE INTO mag_resa_item(resa_id,item_id) ';
-			$query.= " SELECT ".$id.",id FROM mag_inventaire WHERE class_id=".$_POST['add_to_resa_class'];
+			$query.= " SELECT ".$id.",id FROM mag_inventaire WHERE class_id=".
+				$_POST['add_to_resa_class'];
 			$result =  $html->query($query);
         }
 	}
@@ -558,19 +611,19 @@ if ($concept=="RESAS"){ 		######################################################
             for ($i = -90; $i <= 90; $i++) {
             	$unixtime=mktime(0, 0, 0, date("m"), date("d")+$i, date("Y"));
                 $formulaire.= '<OPTION VALUE="'.$unixtime.'" '.
-                                        (
-                                                (
-                                                        (
-                                                                intval($unixtime)          <= $unixtimestart
-                                                        )
-                                                        and
-                                                        (
-                                                                intval($unixtime)+24*60*60 >  $unixtimestart
-                                                        )
-                                                ) ? " SELECTED":""
-                                        )
-                                        .'>'.
-                                        strftime("%A %e %b %Y", $unixtime).'</OPTION>';
+                	(
+                    	(
+                            (
+                                intval($unixtime)          <= $unixtimestart
+                            )
+                                and
+                            (
+                                intval($unixtime)+24*60*60 >  $unixtimestart
+                            )
+                        ) ? " SELECTED":""
+                    )
+                    	.'>'.
+            		strftime("%A %e %b %Y", $unixtime).'</OPTION>';
             }
             $formulaire .= '</SELECT>';
             $formulaire .= '</td>';
@@ -580,9 +633,10 @@ if ($concept=="RESAS"){ 		######################################################
             $secondes = intval( substr($item[2],-8,2) )*60*60 + intval( substr($item[2],-5,2) )*60;
             $formulaire.= '<SELECT NAME="only_time_start" onchange="this.form.submit()">';
             for ($i = 0; $i < 48; $i++) {
-                                $formulaire.= '<OPTION VALUE="'.strval($i*30*60).'" '.($i*60*30==$secondes?" SELECTED":"").'>'.
+                                $formulaire.= '<OPTION VALUE="'.strval($i*30*60).'" '.
+                                	($i*60*30==$secondes?" SELECTED":"").'>'.
                                         date('H:i', mktime(0, 30*$i, 0, 1, 1, 1)
-                                        ).'</OPTION>';
+                                    ).'</OPTION>';
             }
             $formulaire .= '</SELECT>';
             $formulaire .= '</td>';
@@ -608,7 +662,8 @@ if ($concept=="RESAS"){ 		######################################################
             # INFO #######################################################################
 
             $formulaire.= '<tr height="120"><td>Info&nbsp;:<p><!--input class="bouton_in" type="submit" /--></td><td colspan="3">';
-            $formulaire.= '<textarea rows = "4" cols = "74" name = "info">'.$item[6].'</textarea>';
+            $formulaire.= '<textarea rows = "4" cols = "74" name = "info">'.$item[6].
+            	'</textarea>';
             $formulaire.= '<br><input type="submit" class="bouton_in" value="Enregistrer">';
             $formulaire.= "</td></tr>";
 
@@ -619,7 +674,8 @@ if ($concept=="RESAS"){ 		######################################################
 				
 				# kit 1
 				
-				$sql = "select `id`,`name` from `mag_class` where `planning` = 1 and station_id = ".CONFIG::ID_STATION." order by `name` asc";
+				$sql = "select `id`,`name` from `mag_class` where `planning` = 1 and station_id = ".
+					CONFIG::ID_STATION." order by `name` asc";
 				$result1 = $html->query($sql);
 				$formulaire .= '<SELECT NAME="kit1" onchange="this.form.submit()">';
        			$formulaire .= '<OPTION VALUE="-1">N/A</A>';
@@ -634,7 +690,8 @@ if ($concept=="RESAS"){ 		######################################################
       			
       			# kit 2
       			
-      			$sql = "select `id`,`name` from `mag_class` where `planning` = 2 and station_id = ".CONFIG::ID_STATION." order by `name` asc";
+      			$sql = "select `id`,`name` from `mag_class` where `planning` = 2 and station_id = ".
+      				CONFIG::ID_STATION." order by `name` asc";
 				$result1 = $html->query($sql);
 				$formulaire .= '<SELECT NAME="kit2" onchange="this.form.submit()">';
        			$formulaire .= '<OPTION VALUE="-1">N/A</A>';
@@ -708,7 +765,7 @@ if ($concept=="RESAS"){ 		######################################################
 			$formulaire .= $html->rackselect("mag_rack","id" ,"name",$item[9],"stop");
 			$formulaire .= '</td></tr>';
 
-            # ETAPE ##########################################################################
+            # ETAPE ######################################################################
 
 			$sql = 'SELECT count(*) FROM mag_resa_item ';
 			$sql.= 'WHERE mag_resa_item.resa_id='.$id;
@@ -842,64 +899,6 @@ if ($concept=="RESAS"){ 		######################################################
 					}
 				}
 			}
-			
-			/*
-			
-			# LISTE DU MATERIEL DE LA CLASSE DISPONIBLE
-			
-			# if ($list<>"ADD" and $list<>"REMOVE") {
-				$formulaire.= $html->menuselect("mag_class","id" ,"name",$classe);
-				
-				if ($classe > 0) {
-					$sql = 'SELECT  a.id,
-						`mag_brand`.`name`,
-						`mag_model`.`reference`,
-						`mag_model`.`description`,
-						a.`tag`,
-						a.`serial`,
-						a.`refMoscou`,
-						a.`model_id`
-						FROM `mag_inventaire` AS a,`mag_model`,`mag_brand` ';
-					$sql.= 'WHERE `mag_model`.`id`=a.`model_id` and
-						`mag_brand`.`id`=`mag_model`.`brand_id` and ';
-					$sql.= 'NOT EXISTS (SELECT * from mag_resa_item AS b WHERE a.id = b.item_id and b.resa_id = '.$id.') AND ';
-					$sql.= 	' a.status_id = 0 AND '.
-						' a.class_id = '.$classe;
-					$sql.= " ORDER BY mag_brand.name,mag_model.reference";
-					$result = $html->query($sql);
-					if (mysqli_num_rows($result)!=0) {
-						$formulaire.= "<h2>Disponible</h2>";
-						$formulaire.=	'<input type="checkbox" name="add_to_resa_class" value='.$classe.
-							' onchange="this.form.submit()">Ajouter toute la classe.<p>';
-						# Headers
-						$formulaire.='<table><tr><th></th>
-							<th>Marque</th>
-							<th>Modèle</th>
-							<th>Description</th>
-							<th>Etiquette</th>
-							<th>N° Série</th>
-							<th>Ref. Moscou</th>
-							</tr>';
-						while ($item = mysqli_fetch_array($result)) {
-							$formulaire .= '<tr class="tr_hover">'
-								.'<td><input type="checkbox" name="add_to_resa_item[]" value='.$item[0].'></td>'
-								.'<td>'.$item[1].'</td>'
-								.'<td>'.$item[2].'</td>'
-								.'<td>'.$item[3].'</td>'
-								.'<td><a href="mag_item.php?id='.$item[0].'">'.$item[4].'</a></td>'
-								.'<td><a href="mag_item.php?id='.$item[0].'">'.$item[5].'</a></td>'
-								.'<td><a href="mag_item.php?id='.$item[0].'">'.($item[6]==0?"":($item[6]==-1?"NC":$item[6])).'</a></td>'
-								.'</tr>'."\n";
-						}
-						$formulaire.= "</table>";
-						$formulaire.= '<input type="submit" value="Ajouter &agrave; la liste"  class="bouton_in" >';
-					}else{
-						$formulaire.= " Cettre classe ne contient pas d'objet disponible.";
-					}
-				}
-			# }
-			
-			*/
 
 			# INDICATION DU BARCODE
 
@@ -909,8 +908,8 @@ if ($concept=="RESAS"){ 		######################################################
 			
 				$sql = "SELECT kit1 as k from mag_resa WHERE id=".$id;
 				$sql.= " UNION SELECT kit2 as k from mag_resa WHERE id=".$id;
-				$sql.= " UNION SELECT class_id as k from mag_inventaire,mag_resa_item".
-						" WHERE mag_resa_item.item_id = mag_inventaire.id and mag_resa_item.resa_id=".$id;
+			#	$sql.= " UNION SELECT class_id as k from mag_inventaire,mag_resa_item";
+			#	$sql.= " WHERE mag_resa_item.item_id = mag_inventaire.id and mag_resa_item.resa_id=".$id;
 				$result = $html->query($sql);
 				$classes=array();
 				while ($item = mysqli_fetch_array($result)) {
@@ -1746,24 +1745,159 @@ if ($concept=="RESAS"){ 		######################################################
     	<input type="submit">
 		</form>';
 		$html->body.="</th><th>";
-		$html->body.='<a class="menubut" href="?concept=EXPORT_CSV&order_by='.$order_by.'&list='.$list.($model_id>0?'&model_id='.$model_id:'')
-			.($category_id>0?'&category_id='.$category_id:'').($area_id>0?'&area_id='.$area_id:'').($class_id>0?'&class_id='.$class_id:'').'">Export CSV</a></th>';
+		$html->body.='<a class="menubut" href="?concept=EXPORT_CSV'.
+			($class_id>0	?'&class_id='	.$class_id		:'').
+			($model_id>0	?'&model_id='	.$model_id		:'').
+			($category_id>0	?'&category_id='.$category_id	:'').
+			($area_id>0		?'&area_id='	.$area_id		:'').
+			($search!=''	?"&search="		.$search		:'').
+			($status_id>=0	?"&status_id="	.$status_id		:'').
+			($order_by<>''	?"&order_by="	.$order_by		:'').
+			'">Export CSV</a>';
+		$html->body.='</th><th width="200">';
+		
+		$html->body.='
+			<a href="?concept=INVENTAIRE&'.
+			($class_id>0	?'&class_id='	.$class_id		:'').
+			($model_id>0	?'&model_id='	.$model_id		:'').
+			($category_id>0	?'&category_id='.$category_id	:'').
+			($area_id>0		?'&area_id='	.$area_id		:'').
+			($search!=''	?"&search="		.$search		:'').
+			($order_by<>''	?"&order_by="	.$order_by		:'').
+			'&status_id=0"><span class="status0">OK</a></a>';
+			
+		$html->body.='
+			<a href="?concept=INVENTAIRE&'.
+			($class_id>0	?'&class_id='	.$class_id		:'').
+			($model_id>0	?'&model_id='	.$model_id		:'').
+			($category_id>0	?'&category_id='.$category_id	:'').
+			($area_id>0		?'&area_id='	.$area_id		:'').
+			($search!=''	?"&search="		.$search		:'').
+			($order_by<>''	?"&order_by="	.$order_by		:'').
+			'&status_id=1"><span class="status1">NOK</a></a>';
+			
+		$html->body.='
+			<a href="?concept=INVENTAIRE&'.
+			($class_id>0	?'&class_id='	.$class_id		:'').
+			($model_id>0	?'&model_id='	.$model_id		:'').
+			($category_id>0	?'&category_id='.$category_id	:'').
+			($area_id>0		?'&area_id='	.$area_id		:'').
+			($search!=''	?"&search="		.$search		:'').
+			($order_by<>''	?"&order_by="	.$order_by		:'').
+			'&status_id=2"><span class="status2">TEST</a></a>';
+			
+		$html->body.='
+			<a href="?concept=INVENTAIRE&'.
+			($class_id>0	?'&class_id='	.$class_id		:'').
+			($model_id>0	?'&model_id='	.$model_id		:'').
+			($category_id>0	?'&category_id='.$category_id	:'').
+			($area_id>0		?'&area_id='	.$area_id		:'').
+			($search!=''	?"&search="		.$search		:'').
+			($order_by<>''	?"&order_by="	.$order_by		:'').
+			'&status_id=3"><span class="status3">MQ</a></a>';
+			
+		$html->body.='
+			<a href="?concept=INVENTAIRE&'.
+			($class_id>0	?'&class_id='	.$class_id		:'').
+			($model_id>0	?'&model_id='	.$model_id		:'').
+			($category_id>0	?'&category_id='.$category_id	:'').
+			($area_id>0		?'&area_id='	.$area_id		:'').
+			($search!=''	?"&search="		.$search		:'').
+			($order_by<>''	?"&order_by="	.$order_by		:'').
+			'&status_id=4"><span class="status4">REP</a></a>';
+			
+		$html->body.='
+			<a href="?concept=INVENTAIRE&'.
+			($class_id>0	?'&class_id='	.$class_id		:'').
+			($model_id>0	?'&model_id='	.$model_id		:'').
+			($category_id>0	?'&category_id='.$category_id	:'').
+			($area_id>0		?'&area_id='	.$area_id		:'').
+			($search!=''	?"&search="		.$search		:'').
+			($order_by<>''	?"&order_by="	.$order_by		:'').
+			'&status_id=5"><span class="status5">PV</a></a>';
+			
+		$html->body.='
+			<a href="?concept=INVENTAIRE&'.
+			($class_id>0	?'&class_id='	.$class_id		:'').
+			($model_id>0	?'&model_id='	.$model_id		:'').
+			($category_id>0	?'&category_id='.$category_id	:'').
+			($area_id>0		?'&area_id='	.$area_id		:'').
+			($search!=''	?"&search="		.$search		:'').
+			($order_by<>''	?"&order_by="	.$order_by		:'').
+			'&status_id=6"><span class="status6">DET</a></a>';
+		
 		$html->body.="</th></table>";
 		
 		$html->body.="<table>";
 		# Headers
 			
 		$html->body.='
-			<th><a href="?concept=INVENTAIRE&'.($page<>""?"page=".$page."&":"").($class_id>0?"class_id=".$class_id."&":"").($model_id>0?"model_id=".$model_id."&":"").($area_id>=0?"area_id=".$area_id."&":"").($category_id>=0?"category_id=".$category_id."&":"").'order_by=mag_class.name">Classe</a></th>
-			<th><a href="?concept=INVENTAIRE&'.($page<>""?"page=".$page."&":"").($class_id>0?"class_id=".$class_id."&":"").($model_id>0?"model_id=".$model_id."&":"").($area_id>=0?"area_id=".$area_id."&":"").($category_id>=0?"category_id=".$category_id."&":"").'order_by=mag_model.description">Description</a></th>
-			<th><a href="?concept=INVENTAIRE&'.($page<>""?"page=".$page."&":"").($class_id>0?"class_id=".$class_id."&":"").($model_id>0?"model_id=".$model_id."&":"").($area_id>=0?"area_id=".$area_id."&":"").($category_id>=0?"category_id=".$category_id."&":"").'order_by=mag_brand.name">Marque</a></th>
-			<th><a href="?concept=INVENTAIRE&'.($page<>""?"page=".$page."&":"").($class_id>0?"class_id=".$class_id."&":"").($model_id>0?"model_id=".$model_id."&":"").($area_id>=0?"area_id=".$area_id."&":"").($category_id>=0?"category_id=".$category_id."&":"").'order_by=mag_model.reference">Modèle</a></th>
-			<th><a href="?concept=INVENTAIRE&'.($page<>""?"page=".$page."&":"").($class_id>0?"class_id=".$class_id."&":"").($model_id>0?"model_id=".$model_id."&":"").($area_id>=0?"area_id=".$area_id."&":"").($category_id>=0?"category_id=".$category_id."&":"").'order_by=mag_inventaire.tag">Etiquette</a></th>
-			<th>N° Série</th>
-			<th>Ref. Moscou</th>
-			<th><a href="?concept=INVENTAIRE&'.($page<>""?"page=".$page."&":"").($class_id>0?"class_id=".$class_id."&":"").($model_id>0?"model_id=".$model_id."&":"").($area_id>=0?"area_id=".$area_id."&":"").($category_id>=0?"category_id=".$category_id."&":"").'order_by=mag_status.name">&Eacute;tat</a></th>
-			<th><a href="?concept=INVENTAIRE&'.($page<>""?"page=".$page."&":"").($class_id>0?"class_id=".$class_id."&":"").($model_id>0?"model_id=".$model_id."&":"").($area_id>=0?"area_id=".$area_id."&":"").($category_id>=0?"category_id=".$category_id."&":"").'order_by=mag_area.name">Aire</a></th>
-			</tr><tr>';
+			<th><a href="?concept=INVENTAIRE&'.
+			($class_id>0	?'&class_id='	.$class_id		:'').
+			($model_id>0	?'&model_id='	.$model_id		:'').
+			($category_id>0	?'&category_id='.$category_id	:'').
+			($area_id>0		?'&area_id='	.$area_id		:'').
+			($search!=''	?"&search="		.$search		:'').
+			($status_id>=0	?"&status_id="	.$status_id		:'').
+			'&order_by=mag_class.name">Classe</a></th>'.
+			
+			'<th><a href="?concept=INVENTAIRE&'.
+			($class_id>0	?'&class_id='	.$class_id		:'').
+			($model_id>0	?'&model_id='	.$model_id		:'').
+			($category_id>0	?'&category_id='.$category_id	:'').
+			($area_id>0		?'&area_id='	.$area_id		:'').
+			($search!=''	?"&search="		.$search		:'').
+			($status_id>=0	?"&status_id="	.$status_id		:'').
+			'&order_by=mag_model.description">Description</a></th>'.
+			
+			'<th><a href="?concept=INVENTAIRE&'.
+			($class_id>0	?'&class_id='	.$class_id		:'').
+			($model_id>0	?'&model_id='	.$model_id		:'').
+			($category_id>0	?'&category_id='.$category_id	:'').
+			($area_id>0		?'&area_id='	.$area_id		:'').
+			($search!=''	?"&search="		.$search		:'').
+			($status_id>=0	?"&status_id="	.$status_id		:'').
+			'&order_by=mag_brand.name">Marque</a></th>'.
+			
+			'<th><a href="?concept=INVENTAIRE&'.
+			($class_id>0	?'&class_id='	.$class_id		:'').
+			($model_id>0	?'&model_id='	.$model_id		:'').
+			($category_id>0	?'&category_id='.$category_id	:'').
+			($area_id>0		?'&area_id='	.$area_id		:'').
+			($search!=''	?"&search="		.$search		:'').
+			($status_id>=0	?"&status_id="	.$status_id		:'').
+			'&order_by=mag_model.reference">Modèle</a></th>'. 
+			
+			'<th><a href="?concept=INVENTAIRE&'.
+			($class_id>0	?'&class_id='	.$class_id		:'').
+			($model_id>0	?'&model_id='	.$model_id		:'').
+			($category_id>0	?'&category_id='.$category_id	:'').
+			($area_id>0		?'&area_id='	.$area_id		:'').
+			($search!=''	?"&search="		.$search		:'').
+			($status_id>=0	?"&status_id="	.$status_id		:'').
+			'&order_by=mag_inventaire.tag">Etiquette</a></th>'.
+			
+			'<th>N° Série</th>'.
+			'<th>Ref. Moscou</th>'.
+			
+			'<th><a href="?concept=INVENTAIRE&'.
+			($class_id>0	?'&class_id='	.$class_id		:'').
+			($model_id>0	?'&model_id='	.$model_id		:'').
+			($category_id>0	?'&category_id='.$category_id	:'').
+			($area_id>0		?'&area_id='	.$area_id		:'').
+			($search!=''	?"&search="		.$search		:'').
+			($status_id>=0	?"&status_id="	.$status_id		:'').
+			'&order_by=mag_status.name">&Eacute;tat</a></th>'.
+			
+			'<th><a href="?concept=INVENTAIRE&'.
+			($class_id>0	?'&class_id='	.$class_id		:'').
+			($model_id>0	?'&model_id='	.$model_id		:'').
+			($category_id>0	?'&category_id='.$category_id	:'').
+			($area_id>0		?'&area_id='	.$area_id		:'').
+			($search!=''	?"&search="		.$search		:'').
+			($status_id>=0	?"&status_id="	.$status_id		:'').
+			'&order_by=mag_area.name">Lieu</a></th>'.
+			'</tr><tr>';
 		
 		# Selections
 		$sql = 'SELECT 	`mag_inventaire`.id,
@@ -1793,11 +1927,7 @@ if ($concept=="RESAS"){ 		######################################################
 			`mag_class`.`id`=`mag_inventaire`.`class_id` and
 			`mag_brand`.`id`=`mag_model`.`brand_id` and
 			`mag_area`.`id`=`mag_inventaire`.`area_id`';
-		# CLAUSE PAGE
-		if ($page <> "") {
-			$sql.= " and `mag_page`.`name`='".$page."'";
-			$sql.= " and ( `mag_page`.`class_id` =`mag_inventaire`.`class_id` or `mag_page`.`model_id` =`mag_inventaire`.`model_id` or `mag_page`.`area_id` =`mag_inventaire`.`area_id` )";
-		}
+
 		# CLAUSE CLASS ID
 		if ($class_id >= 0) {
 			$sql.= " and `mag_inventaire`.`class_id`='".$class_id."'";
@@ -1813,6 +1943,10 @@ if ($concept=="RESAS"){ 		######################################################
 		# CLAUSE CATEGORIE
 		if ($category_id >= 0) {
 			$sql.= " and `mag_model`.`category_id`='".$category_id."'";
+		}
+		# CLAUSE STATUS
+		if ($status_id >= 0) {
+			$sql.= " and `mag_inventaire`.`status_id`='".$status_id."'";
 		}
 		# CLAUSE SEARCH
 		if ($search<>"") {
@@ -1853,9 +1987,6 @@ if ($concept=="RESAS"){ 		######################################################
 			.'</tr>'."\n";
 		}
 		$html->body.='</table>'."\n";
-		$html->body.= '<table class="menubar"><tr height="50"><th><a class="menubut" href="?concept=EXPORT_CSV&order_by='.$order_by.'&list='.$list.($model_id>0?'&model_id='.$model_id:'')
-			.($category_id>0?'&category_id='.$category_id:'').($area_id>0?'&area_id='.$area_id:'').($class_id>0?'&class_id='.$class_id:'').'">Export CSV</a></th>'."\n";
-		$html->body.= '</tr></table>'."\n";
 		#### ITEM NULL = CODES SANS CODE BARRE
 	}elseif ($list=="NULL"){
 		# ENTETE CONTEXTUEL
@@ -1865,15 +1996,15 @@ if ($concept=="RESAS"){ 		######################################################
 		$html->body.="<table>";
 		# Headers
 		$html->body.='
-			<th><a href="?concept=INVENTAIRE&'.($page<>""?"page=".$page."&":"").($class_id>0?"class_id=".$class_id."&":"").($model_id>0?"model_id=".$model_id."&":"").($area_id>=0?"area_id=".$area_id."&":"").($category_id>=0?"category_id=".$category_id."&":"").'order_by=mag_class.name">Classe</a></th>
-			<th><a href="?concept=INVENTAIRE&'.($page<>""?"page=".$page."&":"").($class_id>0?"class_id=".$class_id."&":"").($model_id>0?"model_id=".$model_id."&":"").($area_id>=0?"area_id=".$area_id."&":"").($category_id>=0?"category_id=".$category_id."&":"").'order_by=mag_model.description">Description</a></th>
-			<th><a href="?concept=INVENTAIRE&'.($page<>""?"page=".$page."&":"").($class_id>0?"class_id=".$class_id."&":"").($model_id>0?"model_id=".$model_id."&":"").($area_id>=0?"area_id=".$area_id."&":"").($category_id>=0?"category_id=".$category_id."&":"").'order_by=mag_brand.name">Marque</a></th>
-			<th><a href="?concept=INVENTAIRE&'.($page<>""?"page=".$page."&":"").($class_id>0?"class_id=".$class_id."&":"").($model_id>0?"model_id=".$model_id."&":"").($area_id>=0?"area_id=".$area_id."&":"").($category_id>=0?"category_id=".$category_id."&":"").'order_by=mag_model.reference">Modèle</a></th>
-			<th><a href="?concept=INVENTAIRE&'.($page<>""?"page=".$page."&":"").($class_id>0?"class_id=".$class_id."&":"").($model_id>0?"model_id=".$model_id."&":"").($area_id>=0?"area_id=".$area_id."&":"").($category_id>=0?"category_id=".$category_id."&":"").'order_by=mag_inventaire.tag">Etiquette</a></th>
+			<th><a href="?concept=INVENTAIRE&'.($class_id>0?"class_id=".$class_id."&":"").($model_id>0?"model_id=".$model_id."&":"").($area_id>=0?"area_id=".$area_id."&":"").($category_id>=0?"category_id=".$category_id."&":"").'order_by=mag_class.name">Classe</a></th>
+			<th><a href="?concept=INVENTAIRE&'.($class_id>0?"class_id=".$class_id."&":"").($model_id>0?"model_id=".$model_id."&":"").($area_id>=0?"area_id=".$area_id."&":"").($category_id>=0?"category_id=".$category_id."&":"").'order_by=mag_model.description">Description</a></th>
+			<th><a href="?concept=INVENTAIRE&'.($class_id>0?"class_id=".$class_id."&":"").($model_id>0?"model_id=".$model_id."&":"").($area_id>=0?"area_id=".$area_id."&":"").($category_id>=0?"category_id=".$category_id."&":"").'order_by=mag_brand.name">Marque</a></th>
+			<th><a href="?concept=INVENTAIRE&'.($class_id>0?"class_id=".$class_id."&":"").($model_id>0?"model_id=".$model_id."&":"").($area_id>=0?"area_id=".$area_id."&":"").($category_id>=0?"category_id=".$category_id."&":"").'order_by=mag_model.reference">Modèle</a></th>
+			<th><a href="?concept=INVENTAIRE&'.($class_id>0?"class_id=".$class_id."&":"").($model_id>0?"model_id=".$model_id."&":"").($area_id>=0?"area_id=".$area_id."&":"").($category_id>=0?"category_id=".$category_id."&":"").'order_by=mag_inventaire.tag">Etiquette</a></th>
 			<th>N° Série</th>
 			<th>Ref. Moscou</th>
-			<th><a href="?concept=INVENTAIRE&'.($page<>""?"page=".$page."&":"").($class_id>0?"class_id=".$class_id."&":"").($model_id>0?"model_id=".$model_id."&":"").($area_id>=0?"area_id=".$area_id."&":"").($category_id>=0?"category_id=".$category_id."&":"").'order_by=mag_status.name">&Eacute;tat</a></th>
-			<th><a href="?concept=INVENTAIRE&'.($page<>""?"page=".$page."&":"").($class_id>0?"class_id=".$class_id."&":"").($model_id>0?"model_id=".$model_id."&":"").($area_id>=0?"area_id=".$area_id."&":"").($category_id>=0?"category_id=".$category_id."&":"").'order_by=mag_area.name">Aire</a></th>
+			<th><a href="?concept=INVENTAIRE&'.($class_id>0?"class_id=".$class_id."&":"").($model_id>0?"model_id=".$model_id."&":"").($area_id>=0?"area_id=".$area_id."&":"").($category_id>=0?"category_id=".$category_id."&":"").'order_by=mag_status.name">&Eacute;tat</a></th>
+			<th><a href="?concept=INVENTAIRE&'.($class_id>0?"class_id=".$class_id."&":"").($model_id>0?"model_id=".$model_id."&":"").($area_id>=0?"area_id=".$area_id."&":"").($category_id>=0?"category_id=".$category_id."&":"").'order_by=mag_area.name">Aire</a></th>
 			</tr><tr>';
 		# Selections
 		$sql = 'SELECT 	`mag_inventaire`.id,		# 0
@@ -1896,9 +2027,7 @@ if ($concept=="RESAS"){ 		######################################################
 			`mag_inventaire`.`class_id`,
 			`mag_inventaire`.`barcode`
 			FROM `mag_inventaire`,`mag_status`,`mag_model`,`mag_class`,`mag_brand`,`mag_area`';
-		if ($page <> "") {
-			$sql .= ',`mag_page`';
-		}
+
 		# REQUETE
 		$sql.= 'WHERE `mag_status`.`id`=`mag_inventaire`.`status_id` and
 			`mag_model`.`id`=`mag_inventaire`.`model_id` and
@@ -1906,11 +2035,7 @@ if ($concept=="RESAS"){ 		######################################################
 			`mag_brand`.`id`=`mag_model`.`brand_id` and
 			`mag_area`.`id`=`mag_inventaire`.`area_id` and
 			`mag_inventaire`.`barcode` IS NULL ';
-		# CLAUSE PAGE
-		if ($page <> "") {
-			$sql.= " and `mag_page`.`name`='".$page."'";
-			$sql.= " and ( `mag_page`.`class_id` =`mag_inventaire`.`class_id` or `mag_page`.`model_id` =`mag_inventaire`.`model_id` or `mag_page`.`area_id` =`mag_inventaire`.`area_id` )";
-		}
+
 		# CLAUSE CLASS ID
 		if ($class_id >= 0) {
 			$sql.= " and `mag_inventaire`.`class_id`='".$class_id."'";
@@ -1945,7 +2070,9 @@ if ($concept=="RESAS"){ 		######################################################
 		}
 		$result = $html->query($sql);
 		while ($item = mysqli_fetch_array($result)) {
-			$html->body .= '<tr class="tr_'.($item_id==$item[0]?"selected":"hover").'" onclick="window.location.href = \'?concept=INVENTAIRE&list=ITEM'.($class_id>0?'&class_id='.$class_id:'').'&item_id='.$item[0].'\'">'
+			$html->body .= '<tr class="tr_'.($item_id==$item[0]?"selected":"hover").
+			'" onclick="window.location.href = \'?concept=INVENTAIRE&list=ITEM'.
+			($class_id>0?'&class_id='.$class_id:'').'&item_id='.$item[0].'\'">'
 			.'<td>'.$item[1].'</td>'										# CLASS
 			.'<td>'.$item[5].'</td>'										# DESCRIPTION
 			.'<td>'.$item[3].'</td>'										# MARQUE
@@ -1958,7 +2085,7 @@ if ($concept=="RESAS"){ 		######################################################
 			.'</tr>'."\n";
 		}
 		$html->body.='</table>';
-	#### CLASS ####################################################################################################################################################################
+	#### CLASS ###########################################################################
 	}elseif ($list=="CLASS") {
 		$order_by 	= (isset($_GET['order_by'])?$_GET['order_by']:"mag_class.name");		
 		$html->body="<table>";
@@ -1991,7 +2118,7 @@ if ($concept=="RESAS"){ 		######################################################
 			.'</tr>'."\n";
 		}
 		$html->body.='</table>';
-	#### BRAND ####################################################################################################################################################################
+	#### BRAND ###########################################################################
 	}elseif ($list=="BRAND") {
 		$order_by 	= (isset($_GET['order_by'])?$_GET['order_by']:"mag_brand.name");
 		# BODY
@@ -2022,7 +2149,7 @@ if ($concept=="RESAS"){ 		######################################################
 				.'</tr>'."\n";
 		}
 		$html->body.='</table>';
-	#### MODEL ####################################################################################################################################################################
+	#### MODEL ###########################################################################
 	}elseif ($list=="MODEL") {
 		$order_by 	= (isset($_GET['order_by'])?$_GET['order_by']:"mag_brand.name");
 		# BODY
@@ -2549,8 +2676,8 @@ if ($concept=="RESAS"){ 		######################################################
 					foreach($blocs as $bloc) {
 						$formulaire.= '<tr>'.$bloc.'</tr>'."\n";
 					}
-					$formulaire.= "<tr><th height=30></td></tr></table>";
 				}
+				$formulaire.="<tr><th height=30></td></tr></table>";
 			}
 			?>
 			<table>
@@ -2589,67 +2716,90 @@ if ($concept=="RESAS"){ 		######################################################
 }elseif ($concept=="EXPORT_CSV") {
 
 	# Selections
-	$sql = 'SELECT * FROM `mag_inventaire`,`mag_status`,`mag_model`,`mag_class`,`mag_brand`,`mag_area`';
+	$sql = 'SELECT mag_class.name, mag_category.name, mag_brand.name, mag_model.reference,
+	 mag_inventaire.serial, mag_inventaire.refMoscou, mag_inventaire.barcode, 
+	 mag_inventaire.tag, mag_inventaire.info, mag_inventaire.creation, mag_area.name, 
+	 mag_status.name, mag_model.description, mag_model.info, mag_model.hyperlien, 
+	 mag_model.prix, mag_model.poids, mag_model.origine 
+	 FROM `mag_inventaire`,`mag_status`,`mag_model`,`mag_class`,`mag_brand`,`mag_area`, 
+	 `mag_category` ';
 	$sql.= 'WHERE `mag_status`.`id`=`mag_inventaire`.`status_id` and
 		`mag_model`.`id`=`mag_inventaire`.`model_id` and
 		`mag_class`.`id`=`mag_inventaire`.`class_id` and
-		`mag_brand`.`id`=`mag_model`.`brand_id` and
+		`mag_brand`.`id`=`mag_model`.`brand_id` and 
+		`mag_category`.`id`=`mag_model`.`category_id` and
 		`mag_area`.`id`=`mag_inventaire`.`area_id`';
-	# CLAUSE CLASS ID
-	if ($class_id >= 0) {
-		$sql.= " and `mag_inventaire`.`class_id`='".$class_id."'";
-	}
-	# CLAUSE MODELE
-	if ($model_id > 0) {
-		$sql.= " and `mag_inventaire`.`model_id`='".$model_id."'";
-	}
-	# CLAUSE AIRE
-	if ($area_id >= 0) {
-		$sql.= " and `mag_inventaire`.`area_id`='".$area_id."'";
-	}
-	# CLAUSE CATEGORIE
-	if ($category_id >= 0) {
-		$sql.= " and `mag_model`.`category_id`='".$category_id."'";
-	}
-	# CLAUSE ORDER BY
-	if ($order_by == "mag_brand.name") {
-		$sql.= " ORDER BY mag_brand.name,mag_model.reference,mag_class.name";
-	}elseif ($order_by == "mag_class.name") {
-		$sql.= " ORDER BY mag_class.name,mag_brand.name,mag_model.reference";
-	}elseif ($order_by == "mag_model.reference") {
-		$sql.= " ORDER BY mag_model.reference,mag_class.name,mag_inventaire.tag";
-	}elseif ($order_by == "mag_model.description") {
-		$sql.= " ORDER BY mag_model.description";
-	}elseif ($order_by == "mag_inventaire.tag") {
-		$sql.= " ORDER BY mag_inventaire.tag,mag_class.name,mag_model.reference";
-	}elseif ($order_by == "mag_area.name") {
-		$sql.= " ORDER BY mag_area.name";
-	}elseif ($order_by == "mag_status.name") {
-		$sql.= " ORDER BY mag_status.name";
-	}
+
+		# CLAUSE CLASS ID
+		if ($class_id >= 0) {
+			$sql.= " and `mag_inventaire`.`class_id`='".$class_id."'";
+		}
+		# CLAUSE MODELE
+		if ($model_id > 0) {
+			$sql.= " and `mag_inventaire`.`model_id`='".$model_id."'";
+		}
+		# CLAUSE AIRE
+		if ($area_id >= 0) {
+			$sql.= " and `mag_inventaire`.`area_id`='".$area_id."'";
+		}
+		# CLAUSE CATEGORIE
+		if ($category_id >= 0) {
+			$sql.= " and `mag_model`.`category_id`='".$category_id."'";
+		}
+		# CLAUSE STATUS
+		if ($status_id >= 0) {
+			$sql.= " and `mag_inventaire`.`status_id`='".$status_id."'";
+		}
+		# CLAUSE SEARCH
+		if ($search<>"") {
+			$sql.= " and (MATCH (`mag_brand`.`name`) AGAINST ('".$search."' IN NATURAL LANGUAGE MODE)";
+			$sql.= " or MATCH (`mag_model`.`reference`,`mag_model`.`description`,`mag_model`.`info`) AGAINST ('".$search."' IN NATURAL LANGUAGE MODE)";
+			$sql.= " or MATCH (`mag_inventaire`.`tag`,`mag_inventaire`.`info`) AGAINST ('".$search."' IN NATURAL LANGUAGE MODE)";
+			$sql.= " or MATCH (`mag_class`.`name`,`mag_class`.`info`) AGAINST ('".$search."' IN NATURAL LANGUAGE MODE))";
+		}
+		# CLAUSE ORDER BY
+		if ($order_by == "mag_brand.name") {
+			$sql.= " ORDER BY mag_brand.name,mag_model.reference,mag_class.name";
+		}elseif ($order_by == "mag_class.name") {
+			$sql.= " ORDER BY mag_class.name,mag_brand.name,mag_model.reference";
+		}elseif ($order_by == "mag_model.reference") {
+				$sql.= " ORDER BY mag_model.reference,mag_class.name,mag_inventaire.tag";
+		}elseif ($order_by == "mag_model.description") {
+			$sql.= " ORDER BY mag_model.description";
+		}elseif ($order_by == "mag_inventaire.tag") {
+			$sql.= " ORDER BY mag_inventaire.tag,mag_class.name,mag_model.reference";
+		}elseif ($order_by == "mag_area.name") {
+			$sql.= " ORDER BY mag_area.name";
+		}elseif ($order_by == "mag_status.name") {
+			$sql.= " ORDER BY mag_status.name";
+		}
+	
 	$result = $html->query($sql);
 	header("Content-Type: text/csv; charset=UTF-8");
 	header("Content-Type: text/csv");
 	header("Content-disposition: filename=resa".$id.".csv");
-	$formulaire = utf8_decode('ETIQUETTE;SERIE;REF MOSCOU;INFO;BARCODE;STATUT;REFERENCE;DESCRIPTION;INFO;HYPERLIEN;PRIX;POIDS;ORIGINE;CLASSE;INFO;MARQUE;LIEU').PHP_EOL;
+	$formulaire = utf8_decode('CLASSE;CATÉGORIE;MARQUE;MODÈLE;SERIAL;'.
+	'MOSCOU;BARCODE;ETIQUETTE;NOTE;AJOUT;LIEU;ÉTAT;DESCRIPTION;INFO;LIEN;'.
+	'PRIX;POIDS;PAYS').PHP_EOL;
 	while ($item = mysqli_fetch_array($result)) {
-		$formulaire .= '"=""'.utf8_decode($item[ 3]).'""";'; #ETIQUETTE
-		$formulaire .= '"=""'.utf8_decode($item[ 4]).'""";'; #SERIE
+		$formulaire .= '"=""'.utf8_decode($item[ 0]).'""";'; 
+		$formulaire .= '"=""'.utf8_decode($item[ 1]).'""";'; 
+		$formulaire .= '"=""'.utf8_decode($item[ 2]).'""";'; 
+		$formulaire .= '"=""'.utf8_decode($item[ 3]).'""";'; 
+		$formulaire .= '"=""'.utf8_decode($item[ 4]).'""";'; 
 		$formulaire .= '"=""'.utf8_decode(($item[ 5]>0?$item[ 5]:"")).'""";'; #REF MOSCOU
-		$formulaire .= '"=""'.utf8_decode($item[ 8]).'""";'; #INFO
-		$formulaire .= '"=""'.utf8_decode($item[10]).'""";'; #BARCODE
-		$formulaire .= '"=""'.utf8_decode($item[12]).'""";'; #STATUT
-		$formulaire .= '"=""'.utf8_decode($item[16]).'""";'; #REFERENCE
-		$formulaire .= '"=""'.utf8_decode($item[17]).'""";'; #DESCRIPTION
-		$formulaire .= '"=""'.utf8_decode($item[18]).'""";'; #INFO
-		$formulaire .= '"=""'.utf8_decode($item[19]).'""";'; #HYPERLIEN
-		$formulaire .= '"=""'.utf8_decode($item[20]).'""";'; #PRIX
-		$formulaire .= '"=""'.utf8_decode($item[21]).'""";'; #POIDS
-		$formulaire .= '"=""'.utf8_decode($item[22]).'""";'; #ORIGINE
-		$formulaire .= '"=""'.utf8_decode($item[25]).'""";'; #CLASSE
-		$formulaire .= '"=""'.utf8_decode($item[26]).'""";'; #INFO
-		$formulaire .= '"=""'.utf8_decode($item[30]).'""";'; #MARQUE
-		$formulaire .= '"=""'.utf8_decode($item[32]).'""";'; #LIEU
+		$formulaire .= '"=""'.utf8_decode($item[ 6]).'""";';
+		$formulaire .= '"=""'.utf8_decode($item[ 7]).'""";'; 
+		$formulaire .= '"=""'.utf8_decode($item[ 8]).'""";'; 
+		$formulaire .= '"=""'.utf8_decode($item[ 9]).'""";'; 
+		$formulaire .= '"=""'.utf8_decode($item[10]).'""";'; 
+		$formulaire .= '"=""'.utf8_decode($item[11]).'""";'; 
+		$formulaire .= '"=""'.utf8_decode($item[12]).'""";'; 
+		$formulaire .= '"=""'.utf8_decode($item[13]).'""";'; 
+		$formulaire .= '"=""'.utf8_decode($item[14]).'""";'; 
+		$formulaire .= '"=""'.utf8_decode($item[15]).'""";'; 
+		$formulaire .= '"=""'.utf8_decode($item[16]).'""";'; 
+		$formulaire .= '"=""'.utf8_decode($item[17]).'"""';  
 		$formulaire .= PHP_EOL;
 	}
 	echo $formulaire;
